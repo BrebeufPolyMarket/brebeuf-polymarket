@@ -29,7 +29,13 @@ export default function LandingPage() {
             href="/auth/login"
             className="rounded-xl bg-[#F6C453] px-6 py-3 text-sm font-bold text-[#1B1F3A] transition hover:brightness-95"
           >
-            Sign in with Brebeuf Google Account
+            Sign In with Brebeuf Email
+          </Link>
+          <Link
+            href="/auth/login?mode=signup"
+            className="rounded-xl border border-white/20 px-6 py-3 text-sm font-semibold text-zinc-100 transition hover:bg-white/10"
+          >
+            Create Account
           </Link>
           <Link
             href="/rules"

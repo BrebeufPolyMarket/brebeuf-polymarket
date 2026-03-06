@@ -150,7 +150,9 @@ enabled = true
 site_url = "https://brebeuf-polymarket.netlify.app"
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
 additional_redirect_urls = [
+  "https://brebeuf-polymarket.netlify.app/auth/confirm",
   "https://brebeuf-polymarket.netlify.app/auth/callback",
+  "http://127.0.0.1:3000/auth/confirm",
   "http://127.0.0.1:3000/auth/callback"
 ]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
@@ -214,6 +216,10 @@ max_frequency = "1m0s"
 otp_length = 8
 # Number of seconds before the email OTP expires (defaults to 1 hour).
 otp_expiry = 3600
+
+[auth.email.template.confirmation]
+subject = "Confirm your Brebeuf Polymarket account"
+content_path = "./supabase/templates/confirmation.html"
 
 # Use a production-ready SMTP server
 # [auth.email.smtp]
@@ -315,6 +321,9 @@ url = ""
 skip_nonce_check = false
 # If enabled, it will allow the user to successfully authenticate when the provider does not return an email address.
 email_optional = false
+
+[auth.external.google]
+enabled = false
 
 # Allow Solana wallet holders to sign in to your project via the Sign in with Solana (SIWS, EIP-4361) standard.
 # You can configure "web3" rate limit in the [auth.rate_limit] section and set up [auth.captcha] if self-hosting.
