@@ -6,6 +6,7 @@ import { HOUSE_IDS } from "@/lib/houses";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const setupSchema = z.object({
+  fullName: z.string().trim().min(2).max(80),
   username: z
     .string()
     .trim()
@@ -79,6 +80,7 @@ export async function POST(request: Request) {
     {
       id: user.id,
       email: user.email,
+      full_name: parsed.data.fullName,
       username: parsed.data.username,
       house: parsed.data.house,
       house_confirmed: false,

@@ -21,6 +21,7 @@ export default function ProfileSetupPage() {
     setError(null);
 
     const payload = {
+      fullName: String(formData.get("fullName") ?? "").trim(),
       username: String(formData.get("username") ?? "").trim(),
       house: String(formData.get("house") ?? "lalemant"),
       gradeYear: Number(formData.get("gradeYear") ?? "9"),
@@ -61,6 +62,19 @@ export default function ProfileSetupPage() {
             void onSubmit(new FormData(event.currentTarget));
           }}
         >
+          <label className="block text-sm">
+            <span className="mb-1 block font-medium ink-soft">Full Name</span>
+            <input
+              name="fullName"
+              type="text"
+              maxLength={80}
+              required
+              placeholder="First Last"
+              className="input-clean"
+            />
+            <span className="mt-1 block text-xs muted">Private to admins only. Your username is public.</span>
+          </label>
+
           <label className="block text-sm">
             <span className="mb-1 block font-medium ink-soft">Username</span>
             <input
