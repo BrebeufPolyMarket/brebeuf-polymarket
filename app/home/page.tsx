@@ -2,6 +2,7 @@ import { AppNavigation } from "@/components/app-navigation";
 import { HouseCupWidget } from "@/components/house-cup-widget";
 import { LiveActivityPanel } from "@/components/live-activity-panel";
 import { MarketCard } from "@/components/market-card";
+import { Reveal } from "@/components/motion/reveal";
 import { RealtimeRefresh } from "@/components/realtime/realtime-refresh";
 import { getHomeFeedData } from "@/lib/data/live";
 
@@ -21,15 +22,15 @@ export default async function HomeFeedPage() {
 
         <div className="flex min-w-0 flex-1 flex-col gap-4 pb-20 lg:pb-4">
           {featured ? (
-            <section className="surface relative overflow-hidden p-5">
+            <Reveal as="section" className="surface relative overflow-hidden p-5" delay={0.5} variant="spring">
               <div className="pointer-events-none absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_20%_50%,rgba(21,108,194,0.18)_0%,rgba(21,108,194,0)_70%)]" />
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--accent-blue)]">Featured</p>
               <h1 className="mt-2 text-xl font-bold text-[var(--ink)] md:text-2xl">{featured.title}</h1>
               <p className="mt-2 max-w-3xl text-sm ink-soft">{featured.description}</p>
-            </section>
+            </Reveal>
           ) : null}
 
-          <section className="flex flex-wrap gap-2 text-xs">
+          <Reveal as="section" className="flex flex-wrap gap-2 text-xs" delay={0.62} variant="spring">
             {[
               "All",
               "Sports",
@@ -46,11 +47,13 @@ export default async function HomeFeedPage() {
                 {tab}
               </button>
             ))}
-          </section>
+          </Reveal>
 
           <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-2">
-            {markets.map((market) => (
-              <MarketCard key={market.id} market={market} />
+            {markets.map((market, index) => (
+              <Reveal key={market.id} delay={0.64 + Math.min(index, 8) * 0.06} variant="spring">
+                <MarketCard market={market} />
+              </Reveal>
             ))}
             {markets.length === 0 ? (
               <div className="surface p-5 text-sm muted">
@@ -61,8 +64,12 @@ export default async function HomeFeedPage() {
         </div>
 
         <aside className="hidden w-80 shrink-0 space-y-4 xl:block">
-          <LiveActivityPanel items={activity} />
-          <HouseCupWidget houses={houses} />
+          <Reveal delay={0.62} variant="spring">
+            <LiveActivityPanel items={activity} />
+          </Reveal>
+          <Reveal delay={0.74} variant="spring">
+            <HouseCupWidget houses={houses} />
+          </Reveal>
         </aside>
       </div>
     </main>

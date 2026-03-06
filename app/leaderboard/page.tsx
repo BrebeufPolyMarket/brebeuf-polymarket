@@ -1,6 +1,7 @@
 import { Crown, Trophy } from "lucide-react";
 
 import { HouseBadge } from "@/components/house-badge";
+import { Reveal } from "@/components/motion/reveal";
 import { RealtimeRefresh } from "@/components/realtime/realtime-refresh";
 import { HOUSE_CONFIG } from "@/lib/houses";
 import { getLeaderboardData } from "@/lib/data/live";
@@ -17,10 +18,14 @@ export default async function LeaderboardPage() {
       <RealtimeRefresh channel="leaderboard-houses" table="houses" />
 
       <section className="mx-auto max-w-6xl">
-        <h1 className="text-3xl font-black text-[var(--ink)]">Leaderboard</h1>
-        <p className="mt-2 text-sm muted">Track top forecasters and the House Cup race in real time.</p>
+        <Reveal delay={0.5} variant="spring">
+          <h1 className="text-3xl font-black text-[var(--ink)]">Leaderboard</h1>
+        </Reveal>
+        <Reveal className="mt-2" delay={0.62} variant="spring">
+          <p className="text-sm muted">Track top forecasters and the House Cup race in real time.</p>
+        </Reveal>
 
-        <div className="surface table-surface mt-6 overflow-x-auto">
+        <Reveal className="surface table-surface mt-6 overflow-x-auto" delay={0.75} variant="spring">
           <table className="min-w-full text-left text-sm">
             <thead className="text-xs uppercase muted">
               <tr>
@@ -62,12 +67,14 @@ export default async function LeaderboardPage() {
               ) : null}
             </tbody>
           </table>
-        </div>
+        </Reveal>
 
         {viewer ? (
-          <p className="mt-3 text-xs muted">
+          <Reveal className="mt-3" delay={0.85} variant="spring">
+            <p className="text-xs muted">
             Your current balance: {viewer.pointsBalance.toLocaleString()} pts | Lifetime won: {viewer.lifetimeWon.toLocaleString()} pts
-          </p>
+            </p>
+          </Reveal>
         ) : null}
 
         <section id="house-cup" className="mt-10">
@@ -77,14 +84,17 @@ export default async function LeaderboardPage() {
           </div>
 
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {sortedHouseStandings.map((houseStanding) => {
+            {sortedHouseStandings.map((houseStanding, index) => {
               const house = HOUSE_CONFIG[houseStanding.house];
               const isLeader = houseStanding.rank === 1;
 
               return (
-                <article
+                <Reveal
                   key={houseStanding.house}
+                  as="article"
                   className={`surface p-4 ${isLeader ? "ring-2 ring-[var(--accent-gold)]/40" : ""}`}
+                  delay={0.62 + index * 0.1}
+                  variant="spring"
                 >
                   <div className="flex items-center justify-between">
                     <h3 className="text-lg font-bold" style={{ color: house.colourHex }}>
@@ -95,7 +105,7 @@ export default async function LeaderboardPage() {
                   <p className="mt-2 text-sm ink-soft">{houseStanding.totalPoints.toLocaleString()} total points</p>
                   <p className="text-xs muted">{houseStanding.memberCount} active members</p>
                   <p className="mt-2 text-xs muted">Top contributor: {houseStanding.topContributor}</p>
-                </article>
+                </Reveal>
               );
             })}
           </div>

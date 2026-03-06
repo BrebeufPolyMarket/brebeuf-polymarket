@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { BetPanel } from "@/components/bet-panel";
 import { YesProbabilityChart } from "@/components/charts/yes-probability-chart";
 import { HouseBadge } from "@/components/house-badge";
+import { Reveal } from "@/components/motion/reveal";
 import { PositionCard } from "@/components/position-card";
 import { RealtimeRefresh } from "@/components/realtime/realtime-refresh";
 import { confidenceLabel } from "@/lib/lmsr";
@@ -45,15 +46,19 @@ export default async function MarketDetailPage({ params }: MarketPageProps) {
 
       <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[1fr_360px]">
         <section>
-          <div className="mb-4 flex flex-wrap items-center gap-2 text-xs">
+          <Reveal className="mb-4 flex flex-wrap items-center gap-2 text-xs" delay={0.5} variant="spring">
             <span className="pill">{market.category}</span>
             <span className="pill">{statusLabel(market.status)}</span>
-          </div>
+          </Reveal>
 
-          <h1 className="text-3xl font-black text-[var(--ink)] md:text-4xl">{market.title}</h1>
-          <p className="mt-3 max-w-3xl text-sm leading-6 ink-soft">{market.description}</p>
+          <Reveal delay={0.62} variant="spring">
+            <h1 className="text-3xl font-black text-[var(--ink)] md:text-4xl">{market.title}</h1>
+          </Reveal>
+          <Reveal className="mt-3 max-w-3xl" delay={0.72} variant="spring">
+            <p className="text-sm leading-6 ink-soft">{market.description}</p>
+          </Reveal>
 
-          <div className="surface mt-6 p-5 md:p-6">
+          <Reveal className="surface mt-6 p-5 md:p-6" delay={0.8} variant="spring">
             <div className={`text-5xl font-black tabular-nums md:text-6xl ${yesLeads ? "text-[var(--accent-green)]" : "text-[var(--accent-red)]"}`}>
               {market.yesPercent}%
             </div>
@@ -71,22 +76,22 @@ export default async function MarketDetailPage({ params }: MarketPageProps) {
               <p>Volume: {market.totalVolume.toLocaleString()} pts</p>
               <p>Traders: {market.traderCount.toLocaleString()}</p>
             </div>
-          </div>
+          </Reveal>
 
-          <div className="mt-6">
+          <Reveal className="mt-6" delay={0.86} variant="spring">
             <PositionCard marketId={market.id} positions={market.currentUserPosition} />
-          </div>
+          </Reveal>
 
-          <section className="surface mt-6 p-5">
+          <Reveal as="section" className="surface mt-6 p-5" delay={0.9} variant="spring">
             <h2 className="text-sm font-semibold uppercase tracking-[0.14em] ink-soft">Resolution Criteria</h2>
             <p className="mt-3 text-sm leading-6 ink-soft">{market.resolutionCriteria}</p>
-          </section>
+          </Reveal>
 
-          <section className="surface mt-6 p-5">
+          <Reveal as="section" className="surface mt-6 p-5" delay={0.95} variant="spring">
             <h2 className="text-sm font-semibold uppercase tracking-[0.14em] ink-soft">Live Activity</h2>
             <div className="mt-3 space-y-3">
-              {market.activity.slice(0, 20).map((item) => (
-                <div key={item.id} className="surface-soft p-3 text-xs ink-soft">
+              {market.activity.slice(0, 20).map((item, index) => (
+                <Reveal key={item.id} className="surface-soft p-3 text-xs ink-soft" delay={0.54 + index * 0.04} variant="spring">
                   <div className="mb-1 flex items-center gap-2">
                     <HouseBadge house={item.house} />
                     <span className="font-semibold text-[var(--ink)]">{item.username}</span>
@@ -94,51 +99,53 @@ export default async function MarketDetailPage({ params }: MarketPageProps) {
                   <p>
                     Bet {item.side} - {item.amount} pts ({item.age})
                   </p>
-                </div>
+                </Reveal>
               ))}
               {market.activity.length === 0 ? <p className="text-xs muted">No activity yet.</p> : null}
             </div>
-          </section>
+          </Reveal>
 
-          <section className="surface mt-6 p-5">
+          <Reveal as="section" className="surface mt-6 p-5" delay={1} variant="spring">
             <h2 className="text-sm font-semibold uppercase tracking-[0.14em] ink-soft">Comments</h2>
             <div className="mt-3 space-y-3">
-              {market.comments.map((comment) => (
-                <article key={comment.id} className="surface-soft p-3 text-xs ink-soft">
+              {market.comments.map((comment, index) => (
+                <Reveal key={comment.id} as="article" className="surface-soft p-3 text-xs ink-soft" delay={0.54 + index * 0.04} variant="spring">
                   <div className="mb-1 flex items-center gap-2">
                     <HouseBadge house={comment.house} />
                     <span className="font-semibold text-[var(--ink)]">{comment.username}</span>
                     <span className="muted">{new Date(comment.createdAt).toLocaleString()}</span>
                   </div>
                   <p>{comment.content}</p>
-                </article>
+                </Reveal>
               ))}
               {market.comments.length === 0 ? <p className="text-xs muted">No comments yet.</p> : null}
             </div>
-          </section>
+          </Reveal>
         </section>
 
         <aside>
           <div className="sticky top-6 space-y-4">
-            <BetPanel
-              marketId={market.id}
-              yesOptionId={market.yesOption.id}
-              noOptionId={market.noOption.id}
-              qYes={market.yesOption.sharesOutstanding}
-              qNo={market.noOption.sharesOutstanding}
-              b={market.liquidityParam}
-              feeRate={market.feeRate}
-              userStatus={viewer?.status ?? "anon"}
-              pointsBalance={viewer?.pointsBalance ?? 0}
-            />
+            <Reveal delay={0.5} variant="spring">
+              <BetPanel
+                marketId={market.id}
+                yesOptionId={market.yesOption.id}
+                noOptionId={market.noOption.id}
+                qYes={market.yesOption.sharesOutstanding}
+                qNo={market.noOption.sharesOutstanding}
+                b={market.liquidityParam}
+                feeRate={market.feeRate}
+                userStatus={viewer?.status ?? "anon"}
+                pointsBalance={viewer?.pointsBalance ?? 0}
+              />
+            </Reveal>
 
-            <div className="surface p-4 text-xs ink-soft">
+            <Reveal className="surface p-4 text-xs ink-soft" delay={0.66} variant="spring">
               <p className="font-semibold text-[var(--ink)]">Probability History</p>
               <p className="mt-1 muted">{market.snapshots.length} snapshots recorded.</p>
               <div className="mt-3">
                 <YesProbabilityChart snapshots={market.snapshots} />
               </div>
-            </div>
+            </Reveal>
           </div>
         </aside>
       </div>
