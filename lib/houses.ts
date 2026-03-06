@@ -25,7 +25,7 @@ export const HOUSE_CONFIG: Record<HouseId, HouseConfig> = {
     colourHex: "#111111",
     founder: "Gabriel Lalemant",
     shortCode: "LA",
-    logoPath: "/logos/houses/lalemant.svg",
+    logoPath: "/logos/houses/lalemant.png",
   },
   jogues: {
     id: "jogues",
@@ -33,7 +33,7 @@ export const HOUSE_CONFIG: Record<HouseId, HouseConfig> = {
     colourHex: "#F1C40F",
     founder: "Isaac Jogues",
     shortCode: "JO",
-    logoPath: "/logos/houses/jogues.svg",
+    logoPath: "/logos/houses/jogues.png",
   },
   lalande: {
     id: "lalande",
@@ -41,7 +41,7 @@ export const HOUSE_CONFIG: Record<HouseId, HouseConfig> = {
     colourHex: "#2471A3",
     founder: "Jean de Lalande",
     shortCode: "LL",
-    logoPath: "/logos/houses/lalande.svg",
+    logoPath: "/logos/houses/lalande.png",
   },
   garnier: {
     id: "garnier",
@@ -49,7 +49,7 @@ export const HOUSE_CONFIG: Record<HouseId, HouseConfig> = {
     colourHex: "#7F8C8D",
     founder: "Charles Garnier",
     shortCode: "GA",
-    logoPath: "/logos/houses/garnier.svg",
+    logoPath: "/logos/houses/garnier.png",
   },
   chabanel: {
     id: "chabanel",
@@ -57,7 +57,7 @@ export const HOUSE_CONFIG: Record<HouseId, HouseConfig> = {
     colourHex: "#C0392B",
     founder: "Noel Chabanel",
     shortCode: "CH",
-    logoPath: "/logos/houses/chabanel.svg",
+    logoPath: "/logos/houses/chabanel.png",
   },
   daniel: {
     id: "daniel",
@@ -65,11 +65,11 @@ export const HOUSE_CONFIG: Record<HouseId, HouseConfig> = {
     colourHex: "#1E8449",
     founder: "Antoine Daniel",
     shortCode: "DA",
-    logoPath: "/logos/houses/daniel.svg",
+    logoPath: "/logos/houses/daniel.png",
   },
 };
 
-export const SCHOOL_LOGO_PATH = "/logos/brebeuf-school-logo.svg";
+export const SCHOOL_LOGO_PATH = "/logos/brebeuf-school-logo.png";
 
 export function isHouseId(value: string): value is HouseId {
   return HOUSE_IDS.includes(value as HouseId);
