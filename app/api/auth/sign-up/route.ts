@@ -64,9 +64,14 @@ export async function POST(request: Request) {
     );
   }
 
+  const hasSession = Boolean(data.session);
+
   return NextResponse.json({
     ok: true,
-    requiresEmailConfirmation: !data.session,
-    message: "Check your email to confirm your account.",
+    requiresEmailConfirmation: !hasSession,
+    redirectTo: hasSession ? "/profile/setup" : "/auth/login",
+    message: hasSession
+      ? "Account created. Continue to profile setup."
+      : "Account created. Sign in to continue profile setup.",
   });
 }

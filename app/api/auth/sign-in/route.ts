@@ -40,17 +40,6 @@ export async function POST(request: Request) {
   });
 
   if (error) {
-    const msg = error.message.toLowerCase();
-    if (msg.includes("email not confirmed")) {
-      return NextResponse.json(
-        {
-          error: "EMAIL_NOT_CONFIRMED",
-          message: "Confirm your email before signing in.",
-        },
-        { status: 403 },
-      );
-    }
-
     return NextResponse.json(
       {
         error: "INVALID_CREDENTIALS",

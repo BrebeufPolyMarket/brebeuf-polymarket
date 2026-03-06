@@ -8,7 +8,6 @@ type AuthMode = "signin" | "signup";
 
 const ERROR_MESSAGES: Record<string, string> = {
   invalid_credentials: "Invalid email or password.",
-  email_not_confirmed: "Check your inbox and confirm your email before signing in.",
   confirmation_failed: "That confirmation link is invalid or expired.",
   invalid_confirmation_link: "That confirmation link is invalid.",
   auth_required: "Sign in is required.",
@@ -89,11 +88,14 @@ export default function LoginPage() {
     }
 
     if (mode === "signup") {
-      setNotice(
-        "Account created. Check your email and click the confirmation link, then complete your profile for admin approval.",
-      );
       setPassword("");
       setConfirmPassword("");
+      if (data?.redirectTo) {
+        router.push(data.redirectTo);
+        router.refresh();
+        return;
+      }
+      setNotice(data?.message ?? "Account created. Sign in to continue profile setup.");
       return;
     }
 
@@ -196,7 +198,7 @@ export default function LoginPage() {
         </form>
 
         <p className="mt-4 text-xs muted">
-          New signups enter pending approval until an admin activates the account with a 100-point signup bonus.
+          New signups go to profile setup, then enter pending approval until an admin activates the account with a 100-point signup bonus.
         </p>
 
         <div className="mt-5 text-xs">
