@@ -1,5 +1,7 @@
 import { Crown, Trophy } from "lucide-react";
 
+import { HouseLogo } from "@/components/branding/house-logo";
+import { SchoolLogo } from "@/components/branding/school-logo";
 import { HouseBadge } from "@/components/house-badge";
 import { Reveal } from "@/components/motion/reveal";
 import { RealtimeRefresh } from "@/components/realtime/realtime-refresh";
@@ -19,7 +21,10 @@ export default async function LeaderboardPage() {
 
       <section className="mx-auto max-w-6xl">
         <Reveal delay={0.5} variant="spring">
-          <h1 className="text-3xl font-black text-[var(--ink)]">Leaderboard</h1>
+          <h1 className="inline-flex items-center gap-3 text-3xl font-black text-[var(--ink)]">
+            <SchoolLogo size={24} />
+            Leaderboard
+          </h1>
         </Reveal>
         <Reveal className="mt-2" delay={0.62} variant="spring">
           <p className="text-sm muted">Track top forecasters and the House Cup race in real time.</p>
@@ -97,7 +102,8 @@ export default async function LeaderboardPage() {
                   variant="spring"
                 >
                   <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-bold" style={{ color: house.colourHex }}>
+                    <h3 className="inline-flex items-center gap-2 text-lg font-bold" style={{ color: house.colourHex }}>
+                      <HouseLogo house={houseStanding.house} size={18} />
                       #{houseStanding.rank} {house.displayName}
                     </h3>
                     {isLeader ? <Trophy className="h-4 w-4 text-[var(--accent-gold)]" /> : null}

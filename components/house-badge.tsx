@@ -1,4 +1,5 @@
 import { HOUSE_CONFIG, type HouseId } from "@/lib/houses";
+import { HouseLogo } from "@/components/branding/house-logo";
 import { cn } from "@/lib/utils";
 
 type HouseBadgeProps = {
@@ -29,13 +30,7 @@ export function HouseBadge({ house, rank, totalPoints, className }: HouseBadgePr
       )}
       style={{ backgroundColor: details.colourHex, borderColor: "rgba(0,0,0,0.08)" }}
     >
-      <span
-        aria-hidden
-        className={cn(
-          "h-1.5 w-1.5 rounded-full",
-          house === "jogues" || house === "garnier" ? "bg-neutral-950" : "bg-white",
-        )}
-      />
+      <HouseLogo house={house} size={14} className="rounded-sm" />
       {details.displayName}
     </span>
   );

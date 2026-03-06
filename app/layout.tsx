@@ -7,6 +7,10 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Brebeuf Polymarket",
   description: "Campus prediction market platform for Brebeuf College School",
+  icons: {
+    icon: "/logos/brebeuf-school-logo.svg",
+    shortcut: "/logos/brebeuf-school-logo.svg",
+  },
 };
 
 export default function RootLayout({

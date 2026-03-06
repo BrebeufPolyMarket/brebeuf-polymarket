@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { BarChart3, Home, LayoutList, Shield, Trophy, User } from "lucide-react";
 
+import { SchoolLogo } from "@/components/branding/school-logo";
 import { HouseBadge } from "@/components/house-badge";
 import type { ViewerProfile } from "@/lib/data/types";
 
@@ -21,8 +22,9 @@ export function AppNavigation({ viewer }: AppNavigationProps) {
   return (
     <>
       <aside className="surface hidden min-h-[calc(100vh-2rem)] w-64 shrink-0 p-4 lg:block">
-        <Link href="/home" className="mb-6 block text-xs font-bold tracking-[0.2em] text-[var(--accent-blue)]">
-          BREBEUF POLYMARKET
+        <Link href="/home" className="mb-6 flex items-center gap-2">
+          <SchoolLogo size={24} />
+          <span className="text-xs font-bold tracking-[0.2em] text-[var(--accent-blue)]">BREBEUF POLYMARKET</span>
         </Link>
 
         {viewer ? (

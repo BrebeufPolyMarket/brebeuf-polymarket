@@ -11,7 +11,7 @@ export default function Template({ children }: TemplateProps) {
 
   return (
     <div key={pathname} className="route-enter">
-      {children}
+      <div className="route-enter-content">{children}</div>
     </div>
   );
 }

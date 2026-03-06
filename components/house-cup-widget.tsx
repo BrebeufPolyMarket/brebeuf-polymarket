@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Trophy } from "lucide-react";
 
+import { HouseLogo } from "@/components/branding/house-logo";
 import { HOUSE_CONFIG } from "@/lib/houses";
 import type { HouseStandingData } from "@/lib/data/types";
 import { cn } from "@/lib/utils";
@@ -40,7 +41,8 @@ export function HouseCupWidget({ houses, className }: HouseCupWidgetProps) {
               )}
             >
               <div className="mb-1 flex items-center justify-between text-xs">
-                <span className="font-semibold" style={{ color: house.colourHex }}>
+                <span className="inline-flex items-center gap-1.5 font-semibold" style={{ color: house.colourHex }}>
+                  <HouseLogo house={standing.house} size={14} />
                   #{standing.rank} {house.displayName}
                 </span>
                 <span className="ink-soft">{standing.totalPoints.toLocaleString()} pts</span>

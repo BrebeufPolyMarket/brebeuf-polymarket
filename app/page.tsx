@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { SchoolLogo } from "@/components/branding/school-logo";
 import { HouseBadge } from "@/components/house-badge";
 import { MainMarketsBoard } from "@/components/landing/main-markets-board";
 import { RecommendMarketBubble } from "@/components/landing/recommend-market-bubble";
@@ -21,7 +22,8 @@ export default async function LandingPage() {
     <main className="app-shell pb-20">
       <section className="mx-auto max-w-6xl px-6 pt-16 md:px-10">
         <Reveal delay={0.1} variant="spring">
-          <div className="inline-flex items-center rounded-full border border-[#d7e4f3] bg-[#eaf2fb] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--accent-blue)]">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#d7e4f3] bg-[#eaf2fb] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--accent-blue)]">
+            <SchoolLogo size={16} priority />
             Brebeuf College School
           </div>
         </Reveal>
@@ -121,7 +123,10 @@ export default async function LandingPage() {
 
       <footer className="mx-auto mt-14 max-w-6xl border-t border-[var(--surface-stroke)] px-6 pt-8 text-xs muted md:px-10">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <span>Brebeuf Polymarket v2.0</span>
+          <span className="inline-flex items-center gap-2">
+            <SchoolLogo size={16} />
+            Brebeuf Polymarket v2.0
+          </span>
           <span>Need help? contact admin@brebeuf.ca</span>
         </div>
       </footer>
