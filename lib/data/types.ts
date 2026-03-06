@@ -130,3 +130,20 @@ export type PortfolioData = {
     winRate: number;
   };
 };
+
+export type MarketRecommendationStatus = "open" | "under_review" | "accepted" | "rejected";
+
+export type MarketRecommendationRow = {
+  id: string;
+  userId: string;
+  username: string;
+  userEmail: string;
+  title: string;
+  description: string;
+  category: "Sports" | "Campus" | "Pop Culture" | "Academic" | "Other";
+  sourceUrl: string | null;
+  status: MarketRecommendationStatus;
+  adminNotes: string | null;
+  createdAt: string;
+  reviewedAt: string | null;
+};

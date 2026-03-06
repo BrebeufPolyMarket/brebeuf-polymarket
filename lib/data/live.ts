@@ -269,6 +269,70 @@ export async function getPendingMarketsData() {
   return markets;
 }
 
+export async function getLandingMarketBoardData() {
+  const { supabase } = await getContext();
+
+  if (!supabase) {
+    return [] as MarketCardData[];
+  }
+
+  const { data: marketsRaw } = await supabase
+    .from("markets")
+    .select(
+      "id, title, description, category, status, is_featured, close_time, created_at, total_volume, trader_count, resolution_criteria, market_options(id, label, probability)",
+    )
+    .eq("type", "binary")
+    .eq("status", "active")
+    .order("close_time", { ascending: true })
+    .order("total_volume", { ascending: false })
+    .limit(200);
+
+  const marketIds = (marketsRaw ?? []).map((market) => market.id);
+  const { data: commentsRaw } = marketIds.length
+    ? await supabase.from("comments").select("market_id").in("market_id", marketIds)
+    : { data: [] as unknown[] };
+
+  const commentCounts = new Map<string, number>();
+  for (const row of commentsRaw ?? []) {
+    const record = row as Record<string, unknown>;
+    const marketId = asString(record.market_id);
+    commentCounts.set(marketId, (commentCounts.get(marketId) ?? 0) + 1);
+  }
+
+  const markets: MarketCardData[] = (marketsRaw ?? []).flatMap((market) => {
+    const options = Array.isArray(market.market_options) ? market.market_options : [];
+    const yes = options.find((option) => asString(option.label).toUpperCase() === "YES");
+
+    if (!yes) {
+      return [];
+    }
+
+    const yesPercent = Math.round(asNumber(yes.probability, 0.5) * 100);
+    const createdAt = new Date(asString(market.created_at, new Date().toISOString()));
+
+    return [
+      {
+        id: asString(market.id),
+        title: asString(market.title),
+        description: asString(market.description),
+        category: asString(market.category),
+        status: asString(market.status),
+        yesPercent,
+        volume: asNumber(market.total_volume),
+        traderCount: asNumber(market.trader_count),
+        closesIn: formatTimeRemaining(asString(market.close_time)),
+        comments: commentCounts.get(asString(market.id)) ?? 0,
+        isHot: asNumber(market.total_volume) >= 1000 || asNumber(market.trader_count) >= 20,
+        isNew: Date.now() - createdAt.getTime() <= 24 * 60 * 60 * 1000,
+        featured: Boolean(market.is_featured),
+        resolutionCriteria: asString(market.resolution_criteria),
+      },
+    ];
+  });
+
+  return markets;
+}
+
 export async function getLeaderboardData() {
   const { supabase, viewer } = await getContext();
 

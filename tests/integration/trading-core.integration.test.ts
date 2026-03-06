@@ -72,4 +72,25 @@ describe.skipIf(!hasEnv)("trading core integration (local supabase)", () => {
     expect(resolve.error?.message).toContain("NOT_AUTHENTICATED");
     expect(cancel.error?.message).toContain("NOT_AUTHENTICATED");
   });
+
+  it("exposes market recommendation table and review RPC", async () => {
+    const supabase = client();
+    const emptyUuid = "00000000-0000-0000-0000-000000000000";
+
+    const tableCheck = await supabase
+      .from("market_recommendations")
+      .select("id, status")
+      .limit(1);
+
+    const review = await supabase.rpc("review_market_recommendation", {
+      p_recommendation_id: emptyUuid,
+      p_status: "accepted",
+      p_admin_notes: "test",
+      p_admin_id: emptyUuid,
+    });
+
+    expect(tableCheck.error).toBeNull();
+    expect(review.error).toBeTruthy();
+    expect(review.error?.message).toContain("NOT_AUTHENTICATED");
+  });
 });

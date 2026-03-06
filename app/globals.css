@@ -230,6 +230,10 @@ h6 {
   animation: framerSpringIn 0.9s var(--reveal-delay, 0s) both;
 }
 
+.route-enter {
+  animation: routeEnter 0.55s cubic-bezier(0.44, 0, 0.56, 1) both;
+}
+
 @keyframes framerSpringIn {
   0% {
     opacity: 0.001;
@@ -244,6 +248,20 @@ h6 {
   100% {
     opacity: 1;
     transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes routeEnter {
+  0% {
+    opacity: 0.001;
+    transform: translate3d(0, 14px, 0);
+    filter: blur(6px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    filter: blur(0);
   }
 }
 
@@ -262,5 +280,9 @@ h6 {
     transform: none;
     animation: none !important;
     transition: none !important;
+  }
+
+  .route-enter {
+    animation: none !important;
   }
 }

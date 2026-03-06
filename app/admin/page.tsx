@@ -51,11 +51,30 @@ export default async function AdminDashboardPage() {
     .select("id", { count: "exact", head: true })
     .eq("status", "pending");
 
+  const { count: openRecommendations } = await supabase
+    .from("market_recommendations")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "open");
+
   return (
     <main className="app-shell px-6 py-10 md:px-10">
       <section className="mx-auto max-w-5xl">
         <h1 className="text-3xl font-black text-[var(--ink)]">Admin Dashboard</h1>
-        <p className="mt-2 text-sm muted">Pending approvals: {pendingApprovals ?? 0}</p>
+        <p className="mt-2 text-sm muted">
+          Pending approvals: {pendingApprovals ?? 0} | Open recommendations: {openRecommendations ?? 0}
+        </p>
+
+        <div className="mt-4 grid gap-3 md:grid-cols-2">
+          <article className="surface p-4">
+            <p className="text-xs uppercase tracking-[0.14em] muted">Recommendations Queue</p>
+            <p className="mt-1 text-sm ink-soft">
+              Review student-submitted market ideas before creating official markets.
+            </p>
+            <Link href="/admin/recommendations" className="btn-secondary mt-3 inline-block px-3 py-1.5 text-xs">
+              Review Recommendations ({openRecommendations ?? 0})
+            </Link>
+          </article>
+        </div>
 
         <div className="surface table-surface mt-6 overflow-x-auto">
           <table className="min-w-full text-left text-sm">

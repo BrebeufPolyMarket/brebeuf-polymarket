@@ -20,6 +20,8 @@ const DOMAIN_ERRORS: Record<string, { status: number; code: string; message: str
   SELL_SHARES_INVALID: { status: 400, code: "SELL_SHARES_INVALID", message: "Sell shares must be positive." },
   BET_TOO_SMALL_AFTER_FEE: { status: 400, code: "BET_TOO_SMALL_AFTER_FEE", message: "Bet amount is too small after fee." },
   CALCULATED_SHARES_INVALID: { status: 500, code: "CALCULATED_SHARES_INVALID", message: "Unable to calculate shares." },
+  RECOMMENDATION_NOT_FOUND: { status: 404, code: "RECOMMENDATION_NOT_FOUND", message: "Market recommendation not found." },
+  INVALID_RECOMMENDATION_STATUS: { status: 400, code: "INVALID_RECOMMENDATION_STATUS", message: "Invalid recommendation status." },
 };
 
 function extractErrorCode(err: unknown) {

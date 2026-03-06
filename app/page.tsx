@@ -1,11 +1,22 @@
 import Link from "next/link";
 
 import { HouseBadge } from "@/components/house-badge";
+import { MainMarketsBoard } from "@/components/landing/main-markets-board";
+import { RecommendMarketBubble } from "@/components/landing/recommend-market-bubble";
 import { MarketCard } from "@/components/market-card";
 import { Reveal } from "@/components/motion/reveal";
-import { HOUSE_STANDINGS, MARKET_PREVIEWS } from "@/lib/mock-data";
+import { getLandingMarketBoardData, getViewerProfile } from "@/lib/data/live";
+import { HOUSE_STANDINGS } from "@/lib/mock-data";
 
-export default function LandingPage() {
+export const dynamic = "force-dynamic";
+
+export default async function LandingPage() {
+  const [viewer, landingMarkets] = await Promise.all([
+    getViewerProfile(),
+    getLandingMarketBoardData(),
+  ]);
+  const previewMarkets = landingMarkets.slice(0, 4);
+
   return (
     <main className="app-shell pb-20">
       <section className="mx-auto max-w-6xl px-6 pt-16 md:px-10">
@@ -70,7 +81,7 @@ export default function LandingPage() {
         </Reveal>
 
         <div className="grid gap-4 md:grid-cols-2">
-          {MARKET_PREVIEWS.slice(0, 4).map((market, index) => (
+          {previewMarkets.map((market, index) => (
             <Reveal key={market.id} className="relative" delay={0.6 + index * 0.08} variant="spring">
               <MarketCard market={market} />
               <div className="absolute inset-0 rounded-[20px] bg-[rgba(244,241,238,0.6)] backdrop-blur-[2px]" />
@@ -79,6 +90,11 @@ export default function LandingPage() {
               </div>
             </Reveal>
           ))}
+          {previewMarkets.length === 0 ? (
+            <Reveal className="surface p-5 text-sm muted md:col-span-2" delay={0.6} variant="spring">
+              No active markets available right now.
+            </Reveal>
+          ) : null}
         </div>
       </section>
 
@@ -101,12 +117,16 @@ export default function LandingPage() {
         </Reveal>
       </section>
 
+      <MainMarketsBoard markets={landingMarkets} />
+
       <footer className="mx-auto mt-14 max-w-6xl border-t border-[var(--surface-stroke)] px-6 pt-8 text-xs muted md:px-10">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <span>Brebeuf Polymarket v2.0</span>
           <span>Need help? contact admin@brebeuf.ca</span>
         </div>
       </footer>
+
+      <RecommendMarketBubble viewer={viewer} />
     </main>
   );
 }
