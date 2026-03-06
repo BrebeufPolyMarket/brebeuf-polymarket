@@ -1,4 +1,4 @@
-const DEFAULT_ALLOWED_EMAIL_DOMAIN = "brebeuf.ca";
+const DEFAULT_ALLOWED_EMAIL_DOMAIN = "tcdsb.ca";
 
 export function getAllowedEmailDomain() {
   return (process.env.ALLOWED_EMAIL_DOMAIN ?? DEFAULT_ALLOWED_EMAIL_DOMAIN)

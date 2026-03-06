@@ -148,7 +148,7 @@ export default function LoginPage() {
               autoComplete="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              placeholder="name@brebeuf.ca"
+              placeholder="name@tcdsb.ca"
               required
               className="input-clean"
             />
@@ -180,7 +180,7 @@ export default function LoginPage() {
             </label>
           ) : null}
 
-          <p className="text-xs muted">Only `@brebeuf.ca` emails are allowed.</p>
+          <p className="text-xs muted">Only `@tcdsb.ca` emails are allowed.</p>
 
           {queryError ? <p className="text-sm font-medium text-[var(--accent-red)]">{queryError}</p> : null}
           {error ? <p className="text-sm font-medium text-[var(--accent-red)]">{error}</p> : null}

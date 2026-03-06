@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         error: "DOMAIN_NOT_ALLOWED",
-        message: "Use your Brebeuf school email address.",
+        message: "Use your TCDSB school email address.",
       },
       { status: 403 },
     );

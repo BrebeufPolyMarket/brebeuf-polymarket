@@ -73,7 +73,7 @@ Migrations include:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `ALLOWED_EMAIL_DOMAIN` (default `brebeuf.ca`)
+- `ALLOWED_EMAIL_DOMAIN` (default `tcdsb.ca`)
 - `SUPABASE_URL` (optional, for integration tests)
 - `SUPABASE_SERVICE_ROLE_KEY` (optional, for integration tests)
 
