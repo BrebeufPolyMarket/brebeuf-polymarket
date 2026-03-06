@@ -234,6 +234,10 @@ h6 {
   animation: routeEnter 0.55s cubic-bezier(0.44, 0, 0.56, 1) both;
 }
 
+.quiz-step-fade {
+  animation: quizStepFade 0.38s cubic-bezier(0.44, 0, 0.56, 1) both;
+}
+
 @keyframes framerSpringIn {
   0% {
     opacity: 0.001;
@@ -265,6 +269,20 @@ h6 {
   }
 }
 
+@keyframes quizStepFade {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+    filter: blur(4px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    filter: blur(0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .surface,
   .surface-soft,
@@ -283,6 +301,10 @@ h6 {
   }
 
   .route-enter {
+    animation: none !important;
+  }
+
+  .quiz-step-fade {
     animation: none !important;
   }
 }
