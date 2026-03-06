@@ -6,6 +6,7 @@ import { HouseBadge } from "@/components/house-badge";
 import { Reveal } from "@/components/motion/reveal";
 import { PositionCard } from "@/components/position-card";
 import { RealtimeRefresh } from "@/components/realtime/realtime-refresh";
+import { BookmarkToggle } from "@/components/watchlist/bookmark-toggle";
 import { confidenceLabel } from "@/lib/lmsr";
 import { getMarketDetailData, getViewerProfile } from "@/lib/data/live";
 
@@ -46,9 +47,14 @@ export default async function MarketDetailPage({ params }: MarketPageProps) {
 
       <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[1fr_360px]">
         <section>
-          <Reveal className="mb-4 flex flex-wrap items-center gap-2 text-xs" delay={0.5} variant="spring">
-            <span className="pill">{market.category}</span>
-            <span className="pill">{statusLabel(market.status)}</span>
+          <Reveal className="mb-4 flex flex-wrap items-center justify-between gap-3 text-xs" delay={0.5} variant="spring">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="pill">{market.category}</span>
+              <span className="pill">{statusLabel(market.status)}</span>
+            </div>
+            {viewer?.status === "active" ? (
+              <BookmarkToggle marketId={market.id} initialBookmarked={market.isWatchlisted} showLabel />
+            ) : null}
           </Reveal>
 
           <Reveal delay={0.62} variant="spring">

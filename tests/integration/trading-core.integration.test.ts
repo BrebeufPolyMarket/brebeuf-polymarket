@@ -93,4 +93,15 @@ describe.skipIf(!hasEnv)("trading core integration (local supabase)", () => {
     expect(review.error).toBeTruthy();
     expect(review.error?.message).toContain("NOT_AUTHENTICATED");
   });
+
+  it("exposes user notification preference columns", async () => {
+    const supabase = client();
+
+    const result = await supabase
+      .from("users")
+      .select("notify_market_close, notify_watchlist_move, notify_house_events, notify_comment_replies")
+      .limit(1);
+
+    expect(result.error).toBeNull();
+  });
 });

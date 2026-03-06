@@ -9,8 +9,10 @@ import type {
   MarketDetailData,
   PortfolioData,
   PortfolioRow,
+  SettingsProfileData,
   TransactionRow,
   ViewerProfile,
+  WatchlistMarketRow,
 } from "@/lib/data/types";
 
 const SAFE_HOUSE_DEFAULT: HouseId = "lalemant";
@@ -180,6 +182,19 @@ export async function getHomeFeedData() {
     commentCounts.set(marketId, (commentCounts.get(marketId) ?? 0) + 1);
   }
 
+  const watchlistedIds = new Set<string>();
+  if (viewer?.status === "active" && marketIds.length > 0) {
+    const { data: watchlistRaw } = await supabase
+      .from("watchlist")
+      .select("market_id")
+      .eq("user_id", viewer.id)
+      .in("market_id", marketIds);
+
+    for (const row of watchlistRaw ?? []) {
+      watchlistedIds.add(asString(row.market_id));
+    }
+  }
+
   const markets: MarketCardData[] = (marketsRaw ?? []).flatMap((market) => {
     const options = Array.isArray(market.market_options) ? market.market_options : [];
     const yes = options.find((option) => asString(option.label).toUpperCase() === "YES");
@@ -198,11 +213,13 @@ export async function getHomeFeedData() {
         description: asString(market.description),
         category: asString(market.category),
         status: asString(market.status),
+        closeTime: asString(market.close_time),
         yesPercent,
         volume: asNumber(market.total_volume),
         traderCount: asNumber(market.trader_count),
         closesIn: formatTimeRemaining(asString(market.close_time)),
         comments: commentCounts.get(asString(market.id)) ?? 0,
+        isWatchlisted: viewer?.status === "active" ? watchlistedIds.has(asString(market.id)) : undefined,
         isHot: asNumber(market.total_volume) >= 1000 || asNumber(market.trader_count) >= 20,
         isNew: Date.now() - createdAt.getTime() <= 24 * 60 * 60 * 1000,
         featured: Boolean(market.is_featured),
@@ -270,7 +287,7 @@ export async function getPendingMarketsData() {
 }
 
 export async function getLandingMarketBoardData() {
-  const { supabase } = await getContext();
+  const { supabase, viewer } = await getContext();
 
   if (!supabase) {
     return [] as MarketCardData[];
@@ -299,6 +316,19 @@ export async function getLandingMarketBoardData() {
     commentCounts.set(marketId, (commentCounts.get(marketId) ?? 0) + 1);
   }
 
+  const watchlistedIds = new Set<string>();
+  if (viewer?.status === "active" && marketIds.length > 0) {
+    const { data: watchlistRaw } = await supabase
+      .from("watchlist")
+      .select("market_id")
+      .eq("user_id", viewer.id)
+      .in("market_id", marketIds);
+
+    for (const row of watchlistRaw ?? []) {
+      watchlistedIds.add(asString(row.market_id));
+    }
+  }
+
   const markets: MarketCardData[] = (marketsRaw ?? []).flatMap((market) => {
     const options = Array.isArray(market.market_options) ? market.market_options : [];
     const yes = options.find((option) => asString(option.label).toUpperCase() === "YES");
@@ -317,11 +347,13 @@ export async function getLandingMarketBoardData() {
         description: asString(market.description),
         category: asString(market.category),
         status: asString(market.status),
+        closeTime: asString(market.close_time),
         yesPercent,
         volume: asNumber(market.total_volume),
         traderCount: asNumber(market.trader_count),
         closesIn: formatTimeRemaining(asString(market.close_time)),
         comments: commentCounts.get(asString(market.id)) ?? 0,
+        isWatchlisted: viewer?.status === "active" ? watchlistedIds.has(asString(market.id)) : undefined,
         isHot: asNumber(market.total_volume) >= 1000 || asNumber(market.trader_count) >= 20,
         isNew: Date.now() - createdAt.getTime() <= 24 * 60 * 60 * 1000,
         featured: Boolean(market.is_featured),
@@ -447,6 +479,18 @@ export async function getMarketDetailData(marketId: string) {
     };
   });
 
+  let isWatchlisted = false;
+  if (viewer?.status === "active") {
+    const { data: watchlistRow } = await supabase
+      .from("watchlist")
+      .select("id")
+      .eq("user_id", viewer.id)
+      .eq("market_id", marketId)
+      .maybeSingle();
+
+    isWatchlisted = Boolean(watchlistRow?.id);
+  }
+
   let currentUserPosition: MarketDetailData["currentUserPosition"] = [];
 
   if (viewer) {
@@ -461,12 +505,12 @@ export async function getMarketDetailData(marketId: string) {
     currentUserPosition = (positionsRaw ?? []).map((position) => {
       const optionData = Array.isArray(position.market_options) ? position.market_options[0] : position.market_options;
       return {
-      optionId: asString(position.option_id),
-      label: asString(optionData?.label, "-"),
-      shares: asNumber(position.shares),
-      avgPrice: asNumber(position.avg_price),
-      currentValue: asNumber(position.current_value),
-      realizedPnl: asNumber(position.realized_pnl),
+        optionId: asString(position.option_id),
+        label: asString(optionData?.label, "-"),
+        shares: asNumber(position.shares),
+        avgPrice: asNumber(position.avg_price),
+        currentValue: asNumber(position.current_value),
+        realizedPnl: asNumber(position.realized_pnl),
       };
     });
   }
@@ -490,6 +534,7 @@ export async function getMarketDetailData(marketId: string) {
     snapshots,
     activity,
     comments,
+    isWatchlisted,
     currentUserPosition,
   };
 }
@@ -571,5 +616,126 @@ export async function getPortfolioData(): Promise<PortfolioData | null> {
       totalPnl,
       winRate: deriveWinRate(viewer.winCount, viewer.lossCount),
     },
+  };
+}
+
+export async function getWatchlistData() {
+  const { supabase, viewer } = await getContext();
+
+  if (!supabase || !viewer) {
+    return null as { viewer: ViewerProfile; items: WatchlistMarketRow[] } | null;
+  }
+
+  if (viewer.status !== "active") {
+    return null as { viewer: ViewerProfile; items: WatchlistMarketRow[] } | null;
+  }
+
+  const { data: watchlistRaw } = await supabase
+    .from("watchlist")
+    .select(
+      "id, market_id, created_at, markets(id, title, description, category, status, is_featured, close_time, created_at, total_volume, trader_count, resolution_criteria, market_options(id, label, probability))",
+    )
+    .eq("user_id", viewer.id)
+    .order("created_at", { ascending: false })
+    .limit(200);
+
+  const marketIds: string[] = [];
+  for (const row of watchlistRaw ?? []) {
+    marketIds.push(asString(row.market_id));
+  }
+
+  const { data: commentsRaw } = marketIds.length
+    ? await supabase.from("comments").select("market_id").in("market_id", marketIds)
+    : { data: [] as unknown[] };
+
+  const commentCounts = new Map<string, number>();
+  for (const row of commentsRaw ?? []) {
+    const record = row as Record<string, unknown>;
+    const marketId = asString(record.market_id);
+    commentCounts.set(marketId, (commentCounts.get(marketId) ?? 0) + 1);
+  }
+
+  const items: WatchlistMarketRow[] = (watchlistRaw ?? []).flatMap((row) => {
+    const market = Array.isArray(row.markets) ? row.markets[0] : row.markets;
+    if (!market) return [];
+
+    const options = Array.isArray(market.market_options) ? market.market_options : [];
+    const yes = options.find((option) => asString(option.label).toUpperCase() === "YES");
+
+    if (!yes) return [];
+
+    const marketId = asString(market.id);
+    const createdAt = new Date(asString(market.created_at, new Date().toISOString()));
+
+    return [
+      {
+        id: asString(row.id),
+        marketId,
+        savedAt: asString(row.created_at),
+        market: {
+          id: marketId,
+          title: asString(market.title),
+          description: asString(market.description),
+          category: asString(market.category),
+          status: asString(market.status),
+          closeTime: asString(market.close_time),
+          yesPercent: Math.round(asNumber(yes.probability, 0.5) * 100),
+          volume: asNumber(market.total_volume),
+          traderCount: asNumber(market.trader_count),
+          closesIn: formatTimeRemaining(asString(market.close_time)),
+          comments: commentCounts.get(marketId) ?? 0,
+          isWatchlisted: true,
+          isHot: asNumber(market.total_volume) >= 1000 || asNumber(market.trader_count) >= 20,
+          isNew: Date.now() - createdAt.getTime() <= 24 * 60 * 60 * 1000,
+          featured: Boolean(market.is_featured),
+          resolutionCriteria: asString(market.resolution_criteria),
+        },
+      },
+    ];
+  });
+
+  return {
+    viewer,
+    items,
+  };
+}
+
+export async function getSettingsProfileData(): Promise<SettingsProfileData | null> {
+  const { supabase, viewer } = await getContext();
+
+  if (!supabase || !viewer) return null;
+
+  const { data: profileRaw } = await supabase
+    .from("users")
+    .select("*")
+    .eq("id", viewer.id)
+    .maybeSingle();
+
+  if (!profileRaw) return null;
+  const profile = profileRaw as Record<string, unknown>;
+  const status = asString(profile.status);
+
+  const { count: unreadCount } = await supabase
+    .from("notifications")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", viewer.id)
+    .eq("read", false);
+
+  return {
+    userId: asString(profile.id),
+    username: asString(profile.username),
+    house: toHouseId(profile.house),
+    status: status === "active" ? "active" : status === "banned" ? "banned" : "pending",
+    fullName: asString(profile.full_name),
+    gradeYear: typeof profile.grade_year === "number" ? profile.grade_year : null,
+    favouriteSubject: asString(profile.favourite_subject),
+    bio: asString(profile.bio),
+    notifications: {
+      notifyMarketClose: Boolean(profile.notify_market_close ?? true),
+      notifyWatchlistMove: Boolean(profile.notify_watchlist_move ?? true),
+      notifyHouseEvents: Boolean(profile.notify_house_events ?? true),
+      notifyCommentReplies: Boolean(profile.notify_comment_replies ?? true),
+    },
+    unreadNotificationCount: asNumber(unreadCount),
   };
 }

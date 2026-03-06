@@ -33,14 +33,10 @@ export async function POST(request: Request) {
     );
   }
 
-  const requestUrl = new URL(request.url);
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
-    options: {
-      emailRedirectTo: `${requestUrl.origin}/auth/confirm`,
-    },
   });
 
   if (error) {
@@ -64,14 +60,26 @@ export async function POST(request: Request) {
     );
   }
 
-  const hasSession = Boolean(data.session);
+  let hasSession = Boolean(data.session);
+
+  // Confirmation is disabled, but on some auth-edge cases the session can be null.
+  // Attempt a single sign-in so onboarding can continue immediately.
+  if (!hasSession) {
+    const signInResult = await supabase.auth.signInWithPassword({
+      email: parsed.data.email,
+      password: parsed.data.password,
+    });
+
+    if (!signInResult.error && signInResult.data.session) {
+      hasSession = true;
+    }
+  }
 
   return NextResponse.json({
     ok: true,
-    requiresEmailConfirmation: !hasSession,
     redirectTo: hasSession ? "/profile/setup" : "/auth/login",
     message: hasSession
-      ? "Account created. Continue to profile setup."
-      : "Account created. Sign in to continue profile setup.",
+      ? "Account created. Continue to your profile quiz."
+      : "Account created. Sign in to continue to your profile quiz.",
   });
 }

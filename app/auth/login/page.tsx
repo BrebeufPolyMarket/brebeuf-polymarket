@@ -3,13 +3,14 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ArrowRight, School, ShieldCheck } from "lucide-react";
 
 type AuthMode = "signin" | "signup";
 
 const ERROR_MESSAGES: Record<string, string> = {
   invalid_credentials: "Invalid email or password.",
-  confirmation_failed: "That confirmation link is invalid or expired.",
-  invalid_confirmation_link: "That confirmation link is invalid.",
+  confirmation_failed: "That sign-in link is invalid or expired.",
+  invalid_confirmation_link: "That sign-in link is invalid.",
   auth_required: "Sign in is required.",
 };
 
@@ -105,107 +106,139 @@ export default function LoginPage() {
 
   return (
     <main className="app-shell px-6 py-10 md:px-10">
-      <section className="mx-auto max-w-md surface p-6">
-        <h1 className="text-2xl font-black text-[var(--ink)]">Brebeuf Polymarket</h1>
-        <p className="mt-2 text-sm muted">Sign in with your school account email or create a new account.</p>
+      <section className="mx-auto grid w-full max-w-5xl gap-5 lg:grid-cols-[1.06fr_0.94fr]">
+        <article className="surface relative overflow-hidden p-7 md:p-8">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(circle_at_20%_0%,rgba(21,108,194,0.18)_0%,rgba(21,108,194,0)_72%)]" />
+          <div className="relative">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--surface-stroke)] bg-white/90 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.15em] text-[var(--accent-blue)]">
+              <School className="h-3.5 w-3.5" />
+              Brebeuf Student Access
+            </div>
+            <h1 className="mt-4 text-3xl font-black text-[var(--ink)] md:text-4xl">
+              Welcome Back 📈
+            </h1>
+            <p className="mt-3 max-w-xl text-sm leading-6 muted">
+              Sign in or create your account with your school email. New accounts go straight to the profile quiz, then enter admin approval.
+            </p>
 
-        <div className="mt-6 grid grid-cols-2 rounded-xl border border-[var(--surface-stroke)] p-1">
-          <button
-            type="button"
-            onClick={() => {
-              setMode("signin");
-              setError(null);
-              setNotice(null);
-            }}
-            className={`rounded-lg px-3 py-2 text-sm font-semibold transition ${
-              mode === "signin"
-                ? "bg-[var(--accent-blue)] text-white"
-                : "text-[var(--ink-soft)] hover:bg-[color-mix(in_srgb,#fff_65%,#e8eef4_35%)]"
-            }`}
-          >
-            Sign In
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setMode("signup");
-              setError(null);
-              setNotice(null);
-            }}
-            className={`rounded-lg px-3 py-2 text-sm font-semibold transition ${
-              mode === "signup"
-                ? "bg-[var(--accent-blue)] text-white"
-                : "text-[var(--ink-soft)] hover:bg-[color-mix(in_srgb,#fff_65%,#e8eef4_35%)]"
-            }`}
-          >
-            Create Account
-          </button>
-        </div>
+            <div className="mt-6 grid gap-3 md:grid-cols-2">
+              <div className="surface-soft p-4">
+                <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--accent-blue)]">
+                  <ShieldCheck className="h-3.5 w-3.5" />
+                  Account Flow
+                </p>
+                <p className="mt-2 text-sm ink-soft">Create account, complete the profile quiz, then wait for admin approval.</p>
+              </div>
+              <div className="surface-soft p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--accent-blue)]">No Email Verification</p>
+                <p className="mt-2 text-sm ink-soft">You do not confirm by email. Admin approval controls platform access.</p>
+              </div>
+            </div>
+          </div>
+        </article>
 
-        <form className="mt-5 space-y-4" onSubmit={onSubmit}>
-          <label className="block text-sm">
-            <span className="mb-1 block font-medium ink-soft">Email</span>
-            <input
-              type="email"
-              autoComplete="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="name@tcdsb.ca"
-              required
-              className="input-clean"
-            />
-          </label>
+        <article className="surface p-6 md:p-7">
+          <div className="grid grid-cols-2 rounded-2xl border border-[var(--surface-stroke)] bg-[color-mix(in_srgb,#fff_74%,#e2ecf5_26%)] p-1.5">
+            <button
+              type="button"
+              onClick={() => {
+                setMode("signin");
+                setError(null);
+                setNotice(null);
+              }}
+              className={`rounded-xl px-3 py-3 text-sm font-semibold transition ${
+                mode === "signin"
+                  ? "bg-[var(--accent-blue)] text-white shadow-[0_12px_20px_-16px_rgba(21,108,194,0.8)]"
+                  : "text-[var(--ink-soft)] hover:bg-white"
+              }`}
+            >
+              Sign In
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setMode("signup");
+                setError(null);
+                setNotice(null);
+              }}
+              className={`rounded-xl px-3 py-3 text-sm font-semibold transition ${
+                mode === "signup"
+                  ? "bg-[var(--accent-blue)] text-white shadow-[0_12px_20px_-16px_rgba(21,108,194,0.8)]"
+                  : "text-[var(--ink-soft)] hover:bg-white"
+              }`}
+            >
+              Create Account
+            </button>
+          </div>
 
-          <label className="block text-sm">
-            <span className="mb-1 block font-medium ink-soft">Password</span>
-            <input
-              type="password"
-              autoComplete={mode === "signup" ? "new-password" : "current-password"}
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              required
-              className="input-clean"
-            />
-          </label>
-
-          {mode === "signup" ? (
+          <form className="mt-5 space-y-4" onSubmit={onSubmit}>
             <label className="block text-sm">
-              <span className="mb-1 block font-medium ink-soft">Confirm Password</span>
+              <span className="mb-1 block font-medium ink-soft">School Email</span>
               <input
-                type="password"
-                autoComplete="new-password"
-                value={confirmPassword}
-                onChange={(event) => setConfirmPassword(event.target.value)}
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="name@tcdsb.ca"
                 required
                 className="input-clean"
               />
             </label>
-          ) : null}
 
-          <p className="text-xs muted">Only `@tcdsb.ca` emails are allowed.</p>
+            <label className="block text-sm">
+              <span className="mb-1 block font-medium ink-soft">Password</span>
+              <input
+                type="password"
+                autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                required
+                className="input-clean"
+              />
+            </label>
 
-          {queryError ? <p className="text-sm font-medium text-[var(--accent-red)]">{queryError}</p> : null}
-          {error ? <p className="text-sm font-medium text-[var(--accent-red)]">{error}</p> : null}
-          {notice ? <p className="text-sm font-medium text-[var(--accent-green)]">{notice}</p> : null}
+            {mode === "signup" ? (
+              <label className="block text-sm">
+                <span className="mb-1 block font-medium ink-soft">Confirm Password</span>
+                <input
+                  type="password"
+                  autoComplete="new-password"
+                  value={confirmPassword}
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                  required
+                  className="input-clean"
+                />
+              </label>
+            ) : null}
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="btn-primary w-full px-4 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-70"
-          >
-            {isSubmitting ? "Please wait..." : mode === "signin" ? "Sign In" : "Create Account"}
-          </button>
-        </form>
+            <p className="text-xs muted">Only `@tcdsb.ca` addresses are allowed.</p>
 
-        <p className="mt-4 text-xs muted">
-          New signups go to profile setup, then enter pending approval until an admin activates the account with a 100-point signup bonus.
-        </p>
+            {queryError ? <p className="text-sm font-medium text-[var(--accent-red)]">{queryError}</p> : null}
+            {error ? <p className="text-sm font-medium text-[var(--accent-red)]">{error}</p> : null}
+            {notice ? <p className="text-sm font-medium text-[var(--accent-green)]">{notice}</p> : null}
 
-        <div className="mt-5 text-xs">
-          <Link href="/" className="font-semibold text-[var(--accent-blue)] hover:underline">
-            Back to landing page
-          </Link>
-        </div>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="btn-primary inline-flex w-full items-center justify-center gap-2 px-5 py-3.5 text-base disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              {isSubmitting ? "Please wait..." : mode === "signin" ? "Sign In" : "Create Account"}
+              {!isSubmitting ? <ArrowRight className="h-4 w-4" /> : null}
+            </button>
+          </form>
+
+          <p className="mt-4 text-xs muted">
+            {mode === "signin"
+              ? "If your profile is incomplete, you will continue directly to the profile quiz."
+              : "After account creation, you will continue directly to the profile quiz."}
+          </p>
+
+          <div className="mt-5 text-xs">
+            <Link href="/" className="font-semibold text-[var(--accent-blue)] hover:underline">
+              Back to landing page
+            </Link>
+          </div>
+        </article>
       </section>
     </main>
   );

@@ -7,6 +7,7 @@ import { HOUSE_CONFIG, HOUSE_IDS } from "@/lib/houses";
 
 const TOTAL_STEPS = 6;
 const GRADE_OPTIONS = [9, 10, 11, 12] as const;
+const SUBJECT_SUGGESTIONS = ["Math", "Science", "English", "History", "Business", "Arts"] as const;
 
 const USERNAME_REGEX = /^[A-Za-z0-9_]+$/;
 
@@ -27,27 +28,27 @@ export default function ProfileSetupPage() {
   const stepMeta = useMemo(() => {
     return [
       {
-        title: "What is your full name?",
-        subtitle: "Private to admins only. Your username is what everyone sees.",
+        title: "🪪 What is your full name?",
+        subtitle: "Private to admins only. Your username is what everyone will see publicly.",
       },
       {
-        title: "Choose your username",
-        subtitle: "This is your public handle on markets and leaderboards.",
+        title: "📣 Choose your username",
+        subtitle: "This public handle appears on markets, comments, and leaderboards.",
       },
       {
-        title: "Which house are you in?",
-        subtitle: "House affects the House Cup standings from your market wins.",
+        title: "🏠 Which house are you in?",
+        subtitle: "Market wins from your account contribute to your House Cup standings.",
       },
       {
-        title: "What grade are you in?",
-        subtitle: "Choose your current grade year.",
+        title: "🎓 What grade are you in?",
+        subtitle: "Choose your current grade level.",
       },
       {
-        title: "What is your favourite subject?",
-        subtitle: "Optional, but helps personalize your profile.",
+        title: "📚 Favourite subject?",
+        subtitle: "Optional. Pick a quick button or type your own.",
       },
       {
-        title: "Write a short bio",
+        title: "✨ Write a short bio",
         subtitle: "Optional, max 160 characters.",
       },
     ] as const;
@@ -123,7 +124,7 @@ export default function ProfileSetupPage() {
       return;
     }
 
-    router.push(data?.redirectTo ?? "/pending");
+    router.push(data?.redirectTo ?? "/");
     router.refresh();
   }
 
@@ -136,7 +137,7 @@ export default function ProfileSetupPage() {
           onChange={(event) => setFullName(event.target.value)}
           placeholder="First Last"
           maxLength={80}
-          className="w-full rounded-2xl border border-[var(--surface-stroke)] bg-white px-5 py-4 text-base font-medium text-[var(--ink)] outline-none transition focus:border-[var(--accent-blue)]/55 focus:shadow-[0_0_0_4px_rgba(21,108,194,0.12)]"
+          className="w-full rounded-2xl border border-[var(--surface-stroke)] bg-white px-5 py-4 text-lg font-medium text-[var(--ink)] outline-none transition focus:border-[var(--accent-blue)]/55 focus:shadow-[0_0_0_4px_rgba(21,108,194,0.12)]"
         />
       );
     }
@@ -149,7 +150,7 @@ export default function ProfileSetupPage() {
           onChange={(event) => setUsername(event.target.value)}
           placeholder="forecastking"
           maxLength={24}
-          className="w-full rounded-2xl border border-[var(--surface-stroke)] bg-white px-5 py-4 text-base font-medium text-[var(--ink)] outline-none transition focus:border-[var(--accent-blue)]/55 focus:shadow-[0_0_0_4px_rgba(21,108,194,0.12)]"
+          className="w-full rounded-2xl border border-[var(--surface-stroke)] bg-white px-5 py-4 text-lg font-medium text-[var(--ink)] outline-none transition focus:border-[var(--accent-blue)]/55 focus:shadow-[0_0_0_4px_rgba(21,108,194,0.12)]"
         />
       );
     }
@@ -165,7 +166,7 @@ export default function ProfileSetupPage() {
                 key={id}
                 type="button"
                 onClick={() => setHouse(id)}
-                className={`rounded-2xl border px-5 py-4 text-left text-base font-semibold transition ${
+                className={`rounded-2xl border px-5 py-5 text-left text-base font-semibold transition ${
                   selected
                     ? "border-[var(--accent-blue)] bg-[color-mix(in_srgb,#fff_58%,#e2ecf5_42%)] text-[var(--ink)]"
                     : "border-[var(--surface-stroke)] bg-white text-[var(--ink-soft)] hover:border-[var(--accent-blue)]/35"
@@ -192,7 +193,7 @@ export default function ProfileSetupPage() {
                 key={grade}
                 type="button"
                 onClick={() => setGradeYear(grade)}
-                className={`rounded-2xl border px-5 py-4 text-base font-semibold transition ${
+                className={`rounded-2xl border px-5 py-5 text-base font-semibold transition ${
                   selected
                     ? "border-[var(--accent-blue)] bg-[color-mix(in_srgb,#fff_58%,#e2ecf5_42%)] text-[var(--ink)]"
                     : "border-[var(--surface-stroke)] bg-white text-[var(--ink-soft)] hover:border-[var(--accent-blue)]/35"
@@ -208,14 +209,35 @@ export default function ProfileSetupPage() {
 
     if (step === 4) {
       return (
-        <input
-          type="text"
-          value={favouriteSubject}
-          onChange={(event) => setFavouriteSubject(event.target.value)}
-          maxLength={80}
-          placeholder="Math, History, Physics..."
-          className="w-full rounded-2xl border border-[var(--surface-stroke)] bg-white px-5 py-4 text-base font-medium text-[var(--ink)] outline-none transition focus:border-[var(--accent-blue)]/55 focus:shadow-[0_0_0_4px_rgba(21,108,194,0.12)]"
-        />
+        <div className="space-y-3">
+          <div className="grid gap-2 sm:grid-cols-3">
+            {SUBJECT_SUGGESTIONS.map((subject) => {
+              const selected = favouriteSubject.toLowerCase() === subject.toLowerCase();
+              return (
+                <button
+                  key={subject}
+                  type="button"
+                  onClick={() => setFavouriteSubject(subject)}
+                  className={`rounded-2xl border px-4 py-3 text-sm font-semibold transition ${
+                    selected
+                      ? "border-[var(--accent-blue)] bg-[color-mix(in_srgb,#fff_58%,#e2ecf5_42%)] text-[var(--ink)]"
+                      : "border-[var(--surface-stroke)] bg-white text-[var(--ink-soft)] hover:border-[var(--accent-blue)]/35"
+                  }`}
+                >
+                  {subject}
+                </button>
+              );
+            })}
+          </div>
+          <input
+            type="text"
+            value={favouriteSubject}
+            onChange={(event) => setFavouriteSubject(event.target.value)}
+            maxLength={80}
+            placeholder="Type your own subject if different..."
+            className="w-full rounded-2xl border border-[var(--surface-stroke)] bg-white px-5 py-4 text-base font-medium text-[var(--ink)] outline-none transition focus:border-[var(--accent-blue)]/55 focus:shadow-[0_0_0_4px_rgba(21,108,194,0.12)]"
+          />
+        </div>
       );
     }
 
@@ -235,7 +257,7 @@ export default function ProfileSetupPage() {
     <main className="app-shell px-6 py-10 md:px-10">
       <section className="mx-auto max-w-2xl surface p-6 md:p-8">
         <h1 className="text-3xl font-black text-[var(--ink)]">Profile Setup Quiz</h1>
-        <p className="mt-2 text-sm muted">One quick step at a time before your account enters approval.</p>
+        <p className="mt-2 text-sm muted">One quick question at a time before your account enters approval.</p>
 
         <div className="mt-5">
           <div className="mb-2 flex items-center justify-between text-xs font-semibold uppercase tracking-[0.14em] muted">
@@ -277,7 +299,7 @@ export default function ProfileSetupPage() {
               type="button"
               onClick={goNext}
               disabled={isSubmitting}
-              className="btn-primary min-w-[160px] px-7 py-3 text-base disabled:cursor-not-allowed disabled:opacity-70"
+              className="btn-primary min-w-[180px] px-8 py-3.5 text-base disabled:cursor-not-allowed disabled:opacity-70"
             >
               Next
             </button>
@@ -288,7 +310,7 @@ export default function ProfileSetupPage() {
                 void submitProfile();
               }}
               disabled={isSubmitting}
-              className="btn-primary min-w-[220px] px-7 py-3 text-base disabled:cursor-not-allowed disabled:opacity-70"
+              className="btn-primary min-w-[240px] px-8 py-3.5 text-base disabled:cursor-not-allowed disabled:opacity-70"
             >
               {isSubmitting ? "Submitting..." : "Submit for Approval"}
             </button>

@@ -17,6 +17,22 @@ export default async function LandingPage() {
     getLandingMarketBoardData(),
   ]);
   const previewMarkets = landingMarkets.slice(0, 4);
+  const primaryHref = viewer
+    ? viewer.status === "active"
+      ? "/home"
+      : viewer.status === "pending"
+        ? "/pending"
+        : "/banned"
+    : "/auth/login";
+  const primaryLabel = viewer
+    ? viewer.status === "active"
+      ? "Open Home Feed"
+      : viewer.status === "pending"
+        ? "View Pending Status"
+        : "View Account Status"
+    : "Sign In with Brebeuf Email";
+  const secondaryHref = viewer?.status === "active" ? "/portfolio" : "/auth/login?mode=signup";
+  const secondaryLabel = viewer?.status === "active" ? "Open Portfolio" : "Create Account";
 
   return (
     <main className="app-shell pb-20">
@@ -42,6 +58,19 @@ export default async function LandingPage() {
           </p>
         </Reveal>
 
+        {viewer?.status === "pending" ? (
+          <Reveal className="mt-6 max-w-3xl" delay={0.86} variant="spring">
+            <div className="surface border-[var(--accent-gold)]/30 bg-[color-mix(in_srgb,#fff_74%,#f4e6da_26%)] p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--accent-gold)]">Application Status</p>
+              <h2 className="mt-1 text-lg font-bold text-[var(--ink)]">Your account is awaiting admin approval.</h2>
+              <p className="mt-1 text-sm ink-soft">You can browse markets now and will unlock trading once your account is activated.</p>
+              <Link href="/pending" className="btn-secondary mt-3 inline-flex px-4 py-2 text-xs hover:border-[var(--accent-blue)]/40">
+                View Pending Status
+              </Link>
+            </div>
+          </Reveal>
+        ) : null}
+
         <Reveal className="mt-8 flex flex-wrap gap-3" delay={0.9} variant="spring">
           {HOUSE_STANDINGS.map((standing) => (
             <HouseBadge key={standing.house} house={standing.house} />
@@ -49,11 +78,11 @@ export default async function LandingPage() {
         </Reveal>
 
         <Reveal className="mt-10 flex flex-wrap gap-3" delay={1.05} variant="spring">
-          <Link href="/auth/login" className="btn-primary px-6 py-3 text-sm">
-            Sign In with Brebeuf Email
+          <Link href={primaryHref} className="btn-primary px-6 py-3 text-sm">
+            {primaryLabel}
           </Link>
-          <Link href="/auth/login?mode=signup" className="btn-secondary px-6 py-3 text-sm hover:border-[var(--accent-blue)]/40">
-            Create Account
+          <Link href={secondaryHref} className="btn-secondary px-6 py-3 text-sm hover:border-[var(--accent-blue)]/40">
+            {secondaryLabel}
           </Link>
           <Link href="/rules" className="btn-secondary px-6 py-3 text-sm hover:border-[var(--accent-blue)]/40">
             View Rules
@@ -85,7 +114,7 @@ export default async function LandingPage() {
         <div className="grid gap-4 md:grid-cols-2">
           {previewMarkets.map((market, index) => (
             <Reveal key={market.id} className="relative" delay={0.6 + index * 0.08} variant="spring">
-              <MarketCard market={market} />
+              <MarketCard market={market} readOnly />
               <div className="absolute inset-0 rounded-[20px] bg-[rgba(244,241,238,0.6)] backdrop-blur-[2px]" />
               <div className="pointer-events-none absolute bottom-4 left-4 rounded-full border border-[var(--surface-stroke)] bg-white/90 px-3 py-1 text-xs font-semibold text-[var(--ink-soft)]">
                 Pending Approval to Bet

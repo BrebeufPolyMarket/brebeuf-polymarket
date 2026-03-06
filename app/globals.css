@@ -235,8 +235,8 @@ h6 {
 }
 
 .route-enter-content {
-  animation: routeEnter 0.34s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-  will-change: opacity, transform;
+  animation: routeEnter 0.42s cubic-bezier(0.22, 0.8, 0.22, 1) both;
+  will-change: opacity, transform, filter;
 }
 
 .quiz-step-fade {
@@ -262,13 +262,15 @@ h6 {
 
 @keyframes routeEnter {
   0% {
-    opacity: 0;
-    transform: translate3d(0, 8px, 0) scale(0.995);
+    opacity: 0.001;
+    transform: translate3d(0, 10px, 0) scale(0.996);
+    filter: blur(6px);
   }
 
   100% {
     opacity: 1;
     transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
   }
 }
 

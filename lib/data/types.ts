@@ -19,11 +19,13 @@ export type MarketCardData = {
   description: string;
   category: string;
   status: string;
+  closeTime: string;
   yesPercent: number;
   volume: number;
   traderCount: number;
   closesIn: string;
   comments: number;
+  isWatchlisted?: boolean;
   isHot?: boolean;
   isNew?: boolean;
   featured?: boolean;
@@ -56,6 +58,7 @@ export type MarketDetailData = {
   snapshots: Array<{ recordedAt: string; yesProbability: number }>;
   activity: LiveActivityItem[];
   comments: Array<{ id: string; content: string; createdAt: string; username: string; house: HouseId }>;
+  isWatchlisted: boolean;
   currentUserPosition: {
     optionId: string;
     label: string;
@@ -146,4 +149,31 @@ export type MarketRecommendationRow = {
   adminNotes: string | null;
   createdAt: string;
   reviewedAt: string | null;
+};
+
+export type WatchlistMarketRow = {
+  id: string;
+  marketId: string;
+  savedAt: string;
+  market: MarketCardData;
+};
+
+export type NotificationPreferences = {
+  notifyMarketClose: boolean;
+  notifyWatchlistMove: boolean;
+  notifyHouseEvents: boolean;
+  notifyCommentReplies: boolean;
+};
+
+export type SettingsProfileData = {
+  userId: string;
+  username: string;
+  house: HouseId;
+  status: "pending" | "active" | "banned";
+  fullName: string;
+  gradeYear: number | null;
+  favouriteSubject: string;
+  bio: string;
+  notifications: NotificationPreferences;
+  unreadNotificationCount: number;
 };
