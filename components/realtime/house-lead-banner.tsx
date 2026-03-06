@@ -68,8 +68,8 @@ export function HouseLeadBanner() {
     <button
       type="button"
       onClick={() => setEvent(null)}
-      className="fixed inset-x-0 top-0 z-50 px-3 py-2 text-center text-sm font-semibold text-white"
-      style={{ backgroundColor: house.colourHex }}
+      className="fixed inset-x-0 top-0 z-50 border-b border-black/10 px-3 py-2.5 text-center text-sm font-semibold text-white shadow-[0_18px_28px_-24px_rgba(0,0,0,0.65)]"
+      style={{ backgroundColor: house.colourHex, backdropFilter: "blur(8px)" }}
     >
       🏆 {house.displayName} has taken the lead in the House Cup!
     </button>

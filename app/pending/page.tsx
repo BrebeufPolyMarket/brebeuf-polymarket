@@ -12,14 +12,14 @@ export default async function PendingApprovalPage() {
   ]);
 
   return (
-    <main className="min-h-screen bg-[#0D0D1A] px-6 py-10 text-zinc-100 md:px-10">
+    <main className="app-shell px-6 py-10 md:px-10">
       <RealtimeRefresh channel="pending-markets" table="market_options" />
       {viewer ? <PendingStatusListener userId={viewer.id} /> : null}
 
       <section className="mx-auto max-w-6xl">
-        <div className="rounded-2xl border border-amber-400/40 bg-amber-300/10 p-5">
-          <h1 className="text-xl font-bold text-amber-300">Account Pending Approval</h1>
-          <p className="mt-2 text-sm text-zinc-200">
+        <div className="surface border-[var(--accent-gold)]/35 bg-[color-mix(in_srgb,#fff_74%,#f4e6da_26%)] p-5">
+          <h1 className="text-xl font-bold text-[var(--ink)]">Account Pending Approval</h1>
+          <p className="mt-2 text-sm ink-soft">
             Your account is awaiting admin approval. You can browse markets and live odds below while you wait.
           </p>
         </div>
@@ -28,14 +28,14 @@ export default async function PendingApprovalPage() {
           {markets.map((market) => (
             <div key={market.id} className="relative">
               <MarketCard market={market} readOnly />
-              <div className="pointer-events-none absolute inset-0 rounded-2xl bg-black/45" />
-              <div className="pointer-events-none absolute bottom-4 left-4 rounded-full bg-black/70 px-3 py-1 text-xs">
+              <div className="pointer-events-none absolute inset-0 rounded-2xl bg-[rgba(244,241,238,0.58)] backdrop-blur-[2px]" />
+              <div className="pointer-events-none absolute bottom-4 left-4 rounded-full border border-[var(--surface-stroke)] bg-white/92 px-3 py-1 text-xs text-[var(--ink-soft)]">
                 Pending Approval
               </div>
             </div>
           ))}
           {markets.length === 0 ? (
-            <div className="rounded-2xl border border-white/10 bg-[#151723] p-5 text-sm text-zinc-400">
+            <div className="surface p-5 text-sm muted">
               No markets available yet.
             </div>
           ) : null}

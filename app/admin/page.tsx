@@ -4,6 +4,20 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
+function AccessState({ message }: { message: string }) {
+  return (
+    <main className="app-shell grid min-h-screen place-items-center px-6">
+      <article className="surface max-w-md p-6 text-center">
+        <h1 className="text-2xl font-black text-[var(--ink)]">Admin Access</h1>
+        <p className="mt-2 text-sm muted">{message}</p>
+        <Link href="/auth/login" className="mt-4 inline-block text-sm font-semibold text-[var(--accent-blue)] hover:underline">
+          Go to Sign In
+        </Link>
+      </article>
+    </main>
+  );
+}
+
 export default async function AdminDashboardPage() {
   const supabase = await createSupabaseServerClient();
   const {
@@ -11,11 +25,7 @@ export default async function AdminDashboardPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return (
-      <main className="grid min-h-screen place-items-center bg-[#0D0D1A] text-zinc-100">
-        <p className="text-sm text-zinc-400">Sign in is required.</p>
-      </main>
-    );
+    return <AccessState message="Sign in is required." />;
   }
 
   const { data: profile } = await supabase
@@ -25,11 +35,7 @@ export default async function AdminDashboardPage() {
     .maybeSingle();
 
   if (!profile?.is_admin) {
-    return (
-      <main className="grid min-h-screen place-items-center bg-[#0D0D1A] text-zinc-100">
-        <p className="text-sm text-zinc-400">Admin access required.</p>
-      </main>
-    );
+    return <AccessState message="Admin access required." />;
   }
 
   const { data: markets } = await supabase
@@ -46,16 +52,14 @@ export default async function AdminDashboardPage() {
     .eq("status", "pending");
 
   return (
-    <main className="min-h-screen bg-[#0D0D1A] px-6 py-10 text-zinc-100 md:px-10">
+    <main className="app-shell px-6 py-10 md:px-10">
       <section className="mx-auto max-w-5xl">
-        <h1 className="text-3xl font-black">Admin Dashboard</h1>
-        <p className="mt-2 text-sm text-zinc-400">
-          Pending approvals: {pendingApprovals ?? 0}
-        </p>
+        <h1 className="text-3xl font-black text-[var(--ink)]">Admin Dashboard</h1>
+        <p className="mt-2 text-sm muted">Pending approvals: {pendingApprovals ?? 0}</p>
 
-        <div className="mt-6 overflow-hidden rounded-2xl border border-white/10">
+        <div className="surface table-surface mt-6 overflow-x-auto">
           <table className="min-w-full text-left text-sm">
-            <thead className="bg-white/5 text-xs uppercase text-zinc-400">
+            <thead className="text-xs uppercase muted">
               <tr>
                 <th className="px-4 py-3">Market</th>
                 <th className="px-4 py-3">Status</th>
@@ -66,16 +70,13 @@ export default async function AdminDashboardPage() {
             </thead>
             <tbody>
               {(markets ?? []).map((market) => (
-                <tr key={market.id} className="border-t border-white/10">
-                  <td className="px-4 py-3">{market.title}</td>
-                  <td className="px-4 py-3">{market.status}</td>
-                  <td className="px-4 py-3">{new Date(market.close_time).toLocaleString()}</td>
-                  <td className="px-4 py-3">{market.total_volume.toLocaleString()}</td>
+                <tr key={market.id}>
+                  <td className="px-4 py-3 font-medium text-[var(--ink)]">{market.title}</td>
+                  <td className="px-4 py-3 ink-soft">{market.status}</td>
+                  <td className="px-4 py-3 ink-soft">{new Date(market.close_time).toLocaleString()}</td>
+                  <td className="px-4 py-3 tabular-nums ink-soft">{market.total_volume.toLocaleString()}</td>
                   <td className="px-4 py-3">
-                    <Link
-                      href={`/admin/markets/${market.id}/resolve`}
-                      className="rounded bg-white/10 px-2 py-1 text-xs hover:bg-white/20"
-                    >
+                    <Link href={`/admin/markets/${market.id}/resolve`} className="btn-secondary px-3 py-1.5 text-xs">
                       Resolve / Cancel
                     </Link>
                   </td>

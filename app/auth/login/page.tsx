@@ -102,12 +102,12 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#0D0D1A] px-6 py-10 text-zinc-100 md:px-10">
-      <section className="mx-auto max-w-md rounded-2xl border border-white/10 bg-[#151723] p-6">
-        <h1 className="text-2xl font-black">Brebeuf Polymarket</h1>
-        <p className="mt-2 text-sm text-zinc-400">Use your Brebeuf email to sign in or create an account.</p>
+    <main className="app-shell px-6 py-10 md:px-10">
+      <section className="mx-auto max-w-md surface p-6">
+        <h1 className="text-2xl font-black text-[var(--ink)]">Brebeuf Polymarket</h1>
+        <p className="mt-2 text-sm muted">Sign in with your school account email or create a new account.</p>
 
-        <div className="mt-6 grid grid-cols-2 rounded-xl border border-white/10 p-1">
+        <div className="mt-6 grid grid-cols-2 rounded-xl border border-[var(--surface-stroke)] p-1">
           <button
             type="button"
             onClick={() => {
@@ -116,7 +116,9 @@ export default function LoginPage() {
               setNotice(null);
             }}
             className={`rounded-lg px-3 py-2 text-sm font-semibold transition ${
-              mode === "signin" ? "bg-[#F6C453] text-[#1B1F3A]" : "text-zinc-300 hover:bg-white/5"
+              mode === "signin"
+                ? "bg-[var(--accent-blue)] text-white"
+                : "text-[var(--ink-soft)] hover:bg-[color-mix(in_srgb,#fff_65%,#e8eef4_35%)]"
             }`}
           >
             Sign In
@@ -129,7 +131,9 @@ export default function LoginPage() {
               setNotice(null);
             }}
             className={`rounded-lg px-3 py-2 text-sm font-semibold transition ${
-              mode === "signup" ? "bg-[#F6C453] text-[#1B1F3A]" : "text-zinc-300 hover:bg-white/5"
+              mode === "signup"
+                ? "bg-[var(--accent-blue)] text-white"
+                : "text-[var(--ink-soft)] hover:bg-[color-mix(in_srgb,#fff_65%,#e8eef4_35%)]"
             }`}
           >
             Create Account
@@ -138,7 +142,7 @@ export default function LoginPage() {
 
         <form className="mt-5 space-y-4" onSubmit={onSubmit}>
           <label className="block text-sm">
-            <span className="mb-1 block text-zinc-300">Email</span>
+            <span className="mb-1 block font-medium ink-soft">Email</span>
             <input
               type="email"
               autoComplete="email"
@@ -146,57 +150,57 @@ export default function LoginPage() {
               onChange={(event) => setEmail(event.target.value)}
               placeholder="name@brebeuf.ca"
               required
-              className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 outline-none ring-[#F6C453]/30 focus:ring"
+              className="input-clean"
             />
           </label>
 
           <label className="block text-sm">
-            <span className="mb-1 block text-zinc-300">Password</span>
+            <span className="mb-1 block font-medium ink-soft">Password</span>
             <input
               type="password"
               autoComplete={mode === "signup" ? "new-password" : "current-password"}
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               required
-              className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 outline-none ring-[#F6C453]/30 focus:ring"
+              className="input-clean"
             />
           </label>
 
           {mode === "signup" ? (
             <label className="block text-sm">
-              <span className="mb-1 block text-zinc-300">Confirm Password</span>
+              <span className="mb-1 block font-medium ink-soft">Confirm Password</span>
               <input
                 type="password"
                 autoComplete="new-password"
                 value={confirmPassword}
                 onChange={(event) => setConfirmPassword(event.target.value)}
                 required
-                className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 outline-none ring-[#F6C453]/30 focus:ring"
+                className="input-clean"
               />
             </label>
           ) : null}
 
-          <p className="text-xs text-zinc-400">Only `@brebeuf.ca` emails are allowed.</p>
+          <p className="text-xs muted">Only `@brebeuf.ca` emails are allowed.</p>
 
-          {queryError ? <p className="text-sm text-rose-300">{queryError}</p> : null}
-          {error ? <p className="text-sm text-rose-300">{error}</p> : null}
-          {notice ? <p className="text-sm text-emerald-300">{notice}</p> : null}
+          {queryError ? <p className="text-sm font-medium text-[var(--accent-red)]">{queryError}</p> : null}
+          {error ? <p className="text-sm font-medium text-[var(--accent-red)]">{error}</p> : null}
+          {notice ? <p className="text-sm font-medium text-[var(--accent-green)]">{notice}</p> : null}
 
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full rounded-xl bg-[#F6C453] px-4 py-3 text-sm font-bold text-[#1B1F3A] disabled:cursor-not-allowed disabled:opacity-70"
+            className="btn-primary w-full px-4 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-70"
           >
             {isSubmitting ? "Please wait..." : mode === "signin" ? "Sign In" : "Create Account"}
           </button>
         </form>
 
-        <p className="mt-4 text-xs text-zinc-500">
-          By signing up, you enter pending approval until an admin activates your account with 100 starting points.
+        <p className="mt-4 text-xs muted">
+          New signups enter pending approval until an admin activates the account with a 100-point signup bonus.
         </p>
 
-        <div className="mt-5 text-xs text-zinc-400">
-          <Link href="/" className="text-[#F6C453] hover:underline">
+        <div className="mt-5 text-xs">
+          <Link href="/" className="font-semibold text-[var(--accent-blue)] hover:underline">
             Back to landing page
           </Link>
         </div>

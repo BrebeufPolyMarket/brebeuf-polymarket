@@ -1,4 +1,4 @@
-import { Trophy } from "lucide-react";
+import { Crown, Trophy } from "lucide-react";
 
 import { HouseBadge } from "@/components/house-badge";
 import { RealtimeRefresh } from "@/components/realtime/realtime-refresh";
@@ -12,17 +12,17 @@ export default async function LeaderboardPage() {
   const sortedHouseStandings = [...houses].sort((a, b) => a.rank - b.rank);
 
   return (
-    <main className="min-h-screen bg-[#0D0D1A] px-6 py-10 text-zinc-100 md:px-10">
+    <main className="app-shell px-6 py-10 md:px-10">
       <RealtimeRefresh channel="leaderboard-users" table="users" />
       <RealtimeRefresh channel="leaderboard-houses" table="houses" />
 
       <section className="mx-auto max-w-6xl">
-        <h1 className="text-3xl font-black text-white">Leaderboard</h1>
-        <p className="mt-2 text-sm text-zinc-400">Track top forecasters and the House Cup race.</p>
+        <h1 className="text-3xl font-black text-[var(--ink)]">Leaderboard</h1>
+        <p className="mt-2 text-sm muted">Track top forecasters and the House Cup race in real time.</p>
 
-        <div className="mt-6 overflow-hidden rounded-2xl border border-white/10">
+        <div className="surface table-surface mt-6 overflow-x-auto">
           <table className="min-w-full text-left text-sm">
-            <thead className="bg-white/5 text-xs uppercase text-zinc-400">
+            <thead className="text-xs uppercase muted">
               <tr>
                 <th className="px-4 py-3">Rank</th>
                 <th className="px-4 py-3">User</th>
@@ -34,23 +34,28 @@ export default async function LeaderboardPage() {
             </thead>
             <tbody>
               {rows.map((row) => (
-                <tr key={row.username} className="border-t border-white/10">
-                  <td className="px-4 py-3 font-semibold text-white">#{row.rank}</td>
+                <tr key={row.username}>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2 font-semibold text-[var(--ink)]">
+                      {row.rank <= 3 ? <Crown className="h-4 w-4 text-[var(--accent-gold)]" /> : null}
+                      <span>#{row.rank}</span>
+                    </div>
+                  </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       <HouseBadge house={row.house} />
-                      <span>{row.username}</span>
+                      <span className="font-medium text-[var(--ink)]">{row.username}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 tabular-nums">{row.pointsBalance}</td>
-                  <td className="px-4 py-3 tabular-nums">{row.lifetimeWon}</td>
-                  <td className="px-4 py-3 tabular-nums">{row.winRate}%</td>
-                  <td className="px-4 py-3 tabular-nums">{row.biggestWin}</td>
+                  <td className="px-4 py-3 tabular-nums ink-soft">{row.pointsBalance.toLocaleString()}</td>
+                  <td className="px-4 py-3 tabular-nums ink-soft">{row.lifetimeWon.toLocaleString()}</td>
+                  <td className="px-4 py-3 tabular-nums ink-soft">{row.winRate}%</td>
+                  <td className="px-4 py-3 tabular-nums ink-soft">{row.biggestWin.toLocaleString()}</td>
                 </tr>
               ))}
               {rows.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-6 text-center text-sm text-zinc-400">
+                  <td colSpan={6} className="px-4 py-6 text-center text-sm muted">
                     No leaderboard data yet.
                   </td>
                 </tr>
@@ -60,15 +65,15 @@ export default async function LeaderboardPage() {
         </div>
 
         {viewer ? (
-          <p className="mt-3 text-xs text-zinc-400">
+          <p className="mt-3 text-xs muted">
             Your current balance: {viewer.pointsBalance.toLocaleString()} pts | Lifetime won: {viewer.lifetimeWon.toLocaleString()} pts
           </p>
         ) : null}
 
         <section id="house-cup" className="mt-10">
           <div className="mb-4 flex items-center gap-2">
-            <Trophy className="h-5 w-5 text-amber-300" />
-            <h2 className="text-2xl font-bold">House Cup Standings</h2>
+            <Trophy className="h-5 w-5 text-[var(--accent-gold)]" />
+            <h2 className="text-2xl font-bold text-[var(--ink)]">House Cup Standings</h2>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -79,17 +84,17 @@ export default async function LeaderboardPage() {
               return (
                 <article
                   key={houseStanding.house}
-                  className={`rounded-2xl border p-4 ${isLeader ? "border-amber-300/80 bg-amber-300/10" : "border-white/10 bg-[#151723]"}`}
+                  className={`surface p-4 ${isLeader ? "ring-2 ring-[var(--accent-gold)]/40" : ""}`}
                 >
                   <div className="flex items-center justify-between">
                     <h3 className="text-lg font-bold" style={{ color: house.colourHex }}>
                       #{houseStanding.rank} {house.displayName}
                     </h3>
-                    {isLeader && <Trophy className="h-4 w-4 text-amber-300" />}
+                    {isLeader ? <Trophy className="h-4 w-4 text-[var(--accent-gold)]" /> : null}
                   </div>
-                  <p className="mt-2 text-sm text-zinc-300">{houseStanding.totalPoints.toLocaleString()} total points</p>
-                  <p className="text-xs text-zinc-400">{houseStanding.memberCount} active members</p>
-                  <p className="mt-2 text-xs text-zinc-400">Top contributor: {houseStanding.topContributor}</p>
+                  <p className="mt-2 text-sm ink-soft">{houseStanding.totalPoints.toLocaleString()} total points</p>
+                  <p className="text-xs muted">{houseStanding.memberCount} active members</p>
+                  <p className="mt-2 text-xs muted">Top contributor: {houseStanding.topContributor}</p>
                 </article>
               );
             })}

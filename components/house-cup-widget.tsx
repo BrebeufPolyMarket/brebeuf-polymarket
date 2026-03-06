@@ -17,18 +17,15 @@ export function HouseCupWidget({ houses, className }: HouseCupWidgetProps) {
   return (
     <Link
       href="/leaderboard#house-cup"
-      className={cn(
-        "block rounded-2xl border border-white/10 bg-[#151723] p-4 shadow-[0_0_0_1px_rgba(255,255,255,0.02)] transition hover:border-white/20",
-        className,
-      )}
+      className={cn("surface block p-4 transition hover:-translate-y-0.5", className)}
     >
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-white">House Cup Standings</h3>
-        <Trophy className="h-4 w-4 text-amber-300" />
+        <h3 className="text-sm font-semibold text-[var(--ink)]">House Cup Standings</h3>
+        <Trophy className="h-4 w-4 text-[var(--accent-gold)]" />
       </div>
 
       <div className="space-y-3">
-        {sorted.length === 0 ? <p className="text-xs text-zinc-400">No house standings yet.</p> : null}
+        {sorted.length === 0 ? <p className="text-xs muted">No house standings yet.</p> : null}
         {sorted.map((standing) => {
           const house = HOUSE_CONFIG[standing.house];
           const width = Math.max(8, Math.round((standing.totalPoints / maxPoints) * 100));
@@ -38,21 +35,18 @@ export function HouseCupWidget({ houses, className }: HouseCupWidgetProps) {
             <div
               key={standing.house}
               className={cn(
-                "rounded-xl border border-transparent px-3 py-2",
-                isLeader && "border-amber-300/70 bg-amber-300/5",
+                "surface-soft rounded-xl border px-3 py-2",
+                isLeader && "border-[var(--accent-gold)]/55 bg-[color-mix(in_srgb,#fff_70%,#f4e6da_30%)]",
               )}
             >
               <div className="mb-1 flex items-center justify-between text-xs">
                 <span className="font-semibold" style={{ color: house.colourHex }}>
                   #{standing.rank} {house.displayName}
                 </span>
-                <span className="text-zinc-300">{standing.totalPoints.toLocaleString()} pts</span>
+                <span className="ink-soft">{standing.totalPoints.toLocaleString()} pts</span>
               </div>
-              <div className="h-2 rounded-full bg-white/10">
-                <div
-                  className="h-full rounded-full"
-                  style={{ width: `${width}%`, backgroundColor: house.colourHex }}
-                />
+              <div className="h-2 rounded-full bg-[#e9dfd8]">
+                <div className="h-full rounded-full" style={{ width: `${width}%`, backgroundColor: house.colourHex }} />
               </div>
             </div>
           );

@@ -1,28 +1,153 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Open Runde";
+  src: url("https://framerusercontent.com/assets/3exmuO07FP19gMM08TQrpXl3BGQ.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Open Runde";
+  src: url("https://framerusercontent.com/assets/HJY4SY2JywrSZ2l1AEW9Tm9cO8.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Open Runde";
+  src: url("https://framerusercontent.com/assets/hG3wmGmFwadB6X5XPVXkMlmLr8o.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+
 :root {
-  --page-bg: #0d0d1a;
-  --card-bg: #151723;
-  --text-main: #f4f5f8;
-  --text-muted: #a4a7b4;
-  --accent-gold: #f6c453;
-  --accent-green: #22c55e;
-  --accent-red: #f43f5e;
+  --page-bg: #f4f1ee;
+  --page-bg-2: #f1ebe5;
+  --surface: #ffffff;
+  --surface-soft: #f9f8f8;
+  --surface-stroke: #e4e2e2;
+  --ink: #1a1615;
+  --ink-soft: #453f3d;
+  --ink-muted: #757170;
+  --accent-blue: #156cc2;
+  --accent-gold: #cf8d13;
+  --accent-green: #0ea158;
+  --accent-red: #c9502e;
+  --radius-lg: 20px;
+  --radius-md: 14px;
+  --shadow-soft: 0 20px 45px -28px rgba(26, 22, 21, 0.28);
+  --shadow-card: 0 18px 32px -24px rgba(26, 22, 21, 0.35);
 }
 
 @theme inline {
   --color-background: var(--page-bg);
-  --color-foreground: var(--text-main);
-  --font-sans: var(--font-inter);
+  --color-foreground: var(--ink);
+  --font-sans: "Open Runde", "Avenir Next", "Segoe UI", sans-serif;
 }
 
 body {
   min-height: 100vh;
-  background: var(--page-bg);
-  color: var(--text-main);
-  font-family: var(--font-inter), sans-serif;
+  background:
+    radial-gradient(circle at 15% -20%, #d9e8f7 0%, rgba(217, 232, 247, 0) 45%),
+    radial-gradient(circle at 90% -10%, #f1dfce 0%, rgba(241, 223, 206, 0) 42%),
+    linear-gradient(180deg, var(--page-bg) 0%, var(--page-bg-2) 100%);
+  color: var(--ink);
+  font-family: "Open Runde", "Avenir Next", "Segoe UI", sans-serif;
 }
 
 * {
-  border-color: rgb(255 255 255 / 0.12);
+  border-color: var(--surface-stroke);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Open Runde", "Inter", "Segoe UI", sans-serif;
+  color: var(--ink);
+}
+
+.app-shell {
+  min-height: 100vh;
+  color: var(--ink);
+}
+
+.surface {
+  border: 1px solid var(--surface-stroke);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, #ffffff 0%, var(--surface-soft) 100%);
+  box-shadow: var(--shadow-card);
+}
+
+.surface-soft {
+  border: 1px solid var(--surface-stroke);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--surface) 82%, var(--page-bg) 18%);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  border: 1px solid var(--surface-stroke);
+  background: color-mix(in srgb, var(--surface) 78%, var(--page-bg) 22%);
+  color: var(--ink-soft);
+  padding: 0.25rem 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.btn-primary {
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--accent-blue) 70%, #fff 30%);
+  background: linear-gradient(180deg, #2d82d8 0%, var(--accent-blue) 100%);
+  color: #f7fbff;
+  font-weight: 700;
+  box-shadow: 0 12px 22px -14px rgba(21, 108, 194, 0.8);
+}
+
+.btn-secondary {
+  border-radius: 12px;
+  border: 1px solid var(--surface-stroke);
+  background: color-mix(in srgb, var(--surface) 84%, var(--page-bg) 16%);
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+
+.input-clean {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--surface-stroke);
+  background: #fff;
+  color: var(--ink);
+  padding: 0.58rem 0.8rem;
+  outline: none;
+}
+
+.input-clean:focus {
+  border-color: color-mix(in srgb, var(--accent-blue) 60%, #fff 40%);
+  box-shadow: 0 0 0 3px rgba(21, 108, 194, 0.14);
+}
+
+.muted {
+  color: var(--ink-muted);
+}
+
+.ink-soft {
+  color: var(--ink-soft);
+}
+
+.table-surface thead {
+  background: color-mix(in srgb, var(--surface) 76%, var(--page-bg) 24%);
+}
+
+.table-surface tr + tr {
+  border-top: 1px solid var(--surface-stroke);
 }

@@ -78,18 +78,18 @@ export function ResolveActions({ marketId, options }: ResolveActionsProps) {
   }
 
   return (
-    <div className="space-y-4 rounded-2xl border border-white/10 bg-[#151723] p-4">
-      <h2 className="text-lg font-bold text-white">Admin Resolution Actions</h2>
+    <div className="surface space-y-4 p-4">
+      <h2 className="text-lg font-bold text-[var(--ink)]">Admin Resolution Actions</h2>
 
       <div className="space-y-2">
-        <label className="text-xs text-zinc-300" htmlFor="winning-option">
+        <label className="text-xs ink-soft" htmlFor="winning-option">
           Winning Option
         </label>
         <select
           id="winning-option"
           value={winningOptionId}
           onChange={(event) => setWinningOptionId(event.target.value)}
-          className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm"
+          className="input-clean text-sm"
         >
           {options.map((option) => (
             <option key={option.id} value={option.id}>
@@ -105,20 +105,20 @@ export function ResolveActions({ marketId, options }: ResolveActionsProps) {
         onClick={() => {
           void onResolve();
         }}
-        className="w-full rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-[#052414] disabled:opacity-60"
+        className="btn-primary w-full px-4 py-2 text-sm disabled:opacity-60"
       >
         {isResolving ? "Resolving..." : "Confirm Resolution"}
       </button>
 
-      <div className="space-y-2 border-t border-white/10 pt-3">
-        <label className="text-xs text-zinc-300" htmlFor="cancel-reason">
+      <div className="space-y-2 border-t border-[var(--surface-stroke)] pt-3">
+        <label className="text-xs ink-soft" htmlFor="cancel-reason">
           Cancel Reason
         </label>
         <textarea
           id="cancel-reason"
           value={cancelReason}
           onChange={(event) => setCancelReason(event.target.value)}
-          className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm"
+          className="input-clean text-sm"
           rows={2}
         />
       </div>
@@ -129,12 +129,12 @@ export function ResolveActions({ marketId, options }: ResolveActionsProps) {
         onClick={() => {
           void onCancel();
         }}
-        className="w-full rounded-lg bg-rose-500 px-4 py-2 text-sm font-semibold text-[#2b0b0f] disabled:opacity-60"
+        className="w-full rounded-lg border border-[#c9502e]/30 bg-[#f9e4df] px-4 py-2 text-sm font-semibold text-[#9b3820] disabled:opacity-60"
       >
         {isCancelling ? "Cancelling..." : "Cancel Market"}
       </button>
 
-      {message ? <p className="text-xs text-zinc-300">{message}</p> : null}
+      {message ? <p className="text-xs ink-soft">{message}</p> : null}
     </div>
   );
 }

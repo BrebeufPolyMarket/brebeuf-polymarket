@@ -64,24 +64,24 @@ export function PositionCard({ marketId, positions }: PositionCardProps) {
 
   if (!positions.length) {
     return (
-      <section className="rounded-2xl border border-white/10 bg-[#151723] p-5">
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-300">Your Position</h3>
-        <p className="mt-2 text-sm text-zinc-400">No open position in this market.</p>
+      <section className="surface p-5">
+        <h3 className="text-sm font-semibold uppercase tracking-wide ink-soft">Your Position</h3>
+        <p className="mt-2 text-sm muted">No open position in this market.</p>
       </section>
     );
   }
 
   return (
-    <section className="rounded-2xl border border-white/10 bg-[#151723] p-5">
-      <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-300">Your Position</h3>
+    <section className="surface p-5">
+      <h3 className="text-sm font-semibold uppercase tracking-wide ink-soft">Your Position</h3>
       <div className="mt-3 space-y-3">
         {positions.map((position) => (
-          <div key={position.optionId} className="rounded-xl bg-white/5 p-3 text-sm text-zinc-200">
+          <div key={position.optionId} className="surface-soft p-3 text-sm ink-soft">
             <p className="font-semibold">
               {position.shares.toFixed(2)} {position.label} shares
             </p>
-            <p className="text-xs text-zinc-400">Avg: {position.avgPrice.toFixed(3)} pts/share</p>
-            <p className="text-xs text-zinc-400">Current value: {Math.floor(position.currentValue)} pts</p>
+            <p className="text-xs muted">Avg: {position.avgPrice.toFixed(3)} pts/share</p>
+            <p className="text-xs muted">Current value: {Math.floor(position.currentValue)} pts</p>
 
             <div className="mt-2 flex gap-2">
               <input
@@ -97,7 +97,7 @@ export function PositionCard({ marketId, positions }: PositionCardProps) {
                   }))
                 }
                 placeholder="Shares to sell"
-                className="w-full rounded-lg border border-white/15 bg-black/30 px-2 py-1 text-xs"
+                className="input-clean px-2 py-1 text-xs"
               />
               <button
                 type="button"
@@ -105,7 +105,7 @@ export function PositionCard({ marketId, positions }: PositionCardProps) {
                   void onSell(position.optionId);
                 }}
                 disabled={loadingId === position.optionId}
-                className="rounded-lg bg-amber-400 px-3 py-1 text-xs font-semibold text-[#1B1F3A] disabled:opacity-60"
+                className="btn-secondary rounded-lg px-3 py-1 text-xs disabled:opacity-60"
               >
                 {loadingId === position.optionId ? "Selling..." : "Sell"}
               </button>
@@ -114,7 +114,7 @@ export function PositionCard({ marketId, positions }: PositionCardProps) {
         ))}
       </div>
 
-      {message ? <p className="mt-3 text-xs text-zinc-300">{message}</p> : null}
+      {message ? <p className="mt-3 text-xs ink-soft">{message}</p> : null}
     </section>
   );
 }

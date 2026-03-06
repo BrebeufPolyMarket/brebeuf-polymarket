@@ -20,7 +20,7 @@ export function PortfolioValueChart({ transactions, openValue }: PortfolioValueC
   }));
 
   if (data.length === 0) {
-    return <p className="text-sm text-zinc-400">No transaction history yet.</p>;
+    return <p className="text-sm muted">No transaction history yet.</p>;
   }
 
   const last = data[data.length - 1]?.value ?? 0;
@@ -30,14 +30,14 @@ export function PortfolioValueChart({ transactions, openValue }: PortfolioValueC
     <div className="h-56 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={data}>
-          <XAxis dataKey="time" tick={{ fill: "#a1a1aa", fontSize: 11 }} tickLine={false} axisLine={false} />
-          <YAxis tick={{ fill: "#a1a1aa", fontSize: 11 }} tickLine={false} axisLine={false} />
+          <XAxis dataKey="time" tick={{ fill: "#757170", fontSize: 11 }} tickLine={false} axisLine={false} />
+          <YAxis tick={{ fill: "#757170", fontSize: 11 }} tickLine={false} axisLine={false} />
           <Tooltip
-            contentStyle={{ background: "#0f1220", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 8 }}
-            labelStyle={{ color: "#d4d4d8" }}
-            itemStyle={{ color: "#60a5fa" }}
+            contentStyle={{ background: "#ffffff", border: "1px solid #e4e2e2", borderRadius: 10 }}
+            labelStyle={{ color: "#453f3d" }}
+            itemStyle={{ color: "#156cc2" }}
           />
-          <Area type="monotone" dataKey="value" stroke="#60a5fa" fill="#60a5fa22" strokeWidth={2} />
+          <Area type="monotone" dataKey="value" stroke="#156cc2" fill="#156cc21f" strokeWidth={2.2} />
         </AreaChart>
       </ResponsiveContainer>
     </div>

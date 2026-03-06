@@ -81,24 +81,24 @@ export function BetPanel({
 
   if (userStatus !== "active") {
     return (
-      <div className="rounded-2xl border border-white/10 bg-[#151723] p-5">
-        <h2 className="text-lg font-bold text-white">Place Bet</h2>
-        <p className="mt-2 text-sm text-zinc-400">Sign in with an approved active account to place bets.</p>
+      <div className="surface p-5">
+        <h2 className="text-lg font-bold text-[var(--ink)]">Place Bet</h2>
+        <p className="mt-2 text-sm muted">Sign in with an approved active account to place bets.</p>
       </div>
     );
   }
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-[#151723] p-5">
-      <h2 className="text-lg font-bold text-white">Place Bet</h2>
-      <p className="mt-1 text-xs text-zinc-400">Balance: {pointsBalance.toLocaleString()} pts</p>
+    <div className="surface p-5">
+      <h2 className="text-lg font-bold text-[var(--ink)]">Place Bet</h2>
+      <p className="mt-1 text-xs muted">Balance: {pointsBalance.toLocaleString()} pts</p>
 
       <div className="mt-4 grid grid-cols-2 gap-2">
         <button
           type="button"
           onClick={() => setSide("YES")}
           className={`rounded-lg px-3 py-2 text-sm font-semibold ${
-            side === "YES" ? "bg-emerald-500 text-[#04170f]" : "bg-emerald-500/20 text-emerald-300"
+            side === "YES" ? "bg-[var(--accent-green)] text-white" : "bg-[#e3f3eb] text-[#0f6f44]"
           }`}
         >
           YES
@@ -107,14 +107,14 @@ export function BetPanel({
           type="button"
           onClick={() => setSide("NO")}
           className={`rounded-lg px-3 py-2 text-sm font-semibold ${
-            side === "NO" ? "bg-rose-500 text-[#29070d]" : "bg-rose-500/20 text-rose-300"
+            side === "NO" ? "bg-[var(--accent-red)] text-white" : "bg-[#f9e4df] text-[#9b3820]"
           }`}
         >
           NO
         </button>
       </div>
 
-      <label className="mt-4 block text-xs text-zinc-300" htmlFor="bet-amount">
+      <label className="mt-4 block text-xs ink-soft" htmlFor="bet-amount">
         Amount (points)
       </label>
       <input
@@ -124,16 +124,16 @@ export function BetPanel({
         step={1}
         value={points}
         onChange={(event) => setPoints(Number(event.target.value || 0))}
-        className="mt-1 w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm outline-none ring-emerald-400/40 focus:ring"
+        className="input-clean mt-1"
       />
 
-      <div className="mt-4 rounded-lg bg-white/5 p-3 text-xs text-zinc-300">
+      <div className="surface-soft mt-4 p-3 text-xs ink-soft">
         <p>You get ~{shares.toFixed(2)} shares</p>
         <p>If {side} wins: +{projectedPayout} pts</p>
         <p>Fee: {feePoints} pts</p>
       </div>
 
-      {message ? <p className="mt-3 text-xs text-zinc-300">{message}</p> : null}
+      {message ? <p className="mt-3 text-xs ink-soft">{message}</p> : null}
 
       <button
         type="button"
@@ -141,7 +141,7 @@ export function BetPanel({
         onClick={() => {
           void submitBet();
         }}
-        className="mt-4 w-full rounded-xl bg-emerald-500 px-4 py-3 text-sm font-bold text-[#07140f] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
+        className="btn-primary mt-4 w-full px-4 py-3 text-sm transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isSubmitting ? "Placing Bet..." : "Place Bet"}
       </button>

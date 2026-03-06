@@ -49,10 +49,10 @@ export default function ProfileSetupPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#0D0D1A] px-6 py-10 text-zinc-100 md:px-10">
-      <section className="mx-auto max-w-2xl rounded-2xl border border-white/10 bg-[#151723] p-6">
-        <h1 className="text-2xl font-black">Complete Your Profile</h1>
-        <p className="mt-2 text-sm text-zinc-400">Your account will stay pending until admin approval.</p>
+    <main className="app-shell px-6 py-10 md:px-10">
+      <section className="mx-auto max-w-2xl surface p-6">
+        <h1 className="text-2xl font-black text-[var(--ink)]">Complete Your Profile</h1>
+        <p className="mt-2 text-sm muted">Your account stays pending until admin approval confirms your house and activates points.</p>
 
         <form
           className="mt-6 space-y-4"
@@ -62,27 +62,27 @@ export default function ProfileSetupPage() {
           }}
         >
           <label className="block text-sm">
-            <span className="mb-1 block text-zinc-300">Username</span>
+            <span className="mb-1 block font-medium ink-soft">Username</span>
             <input
               name="username"
               type="text"
               maxLength={24}
               required
               placeholder="forecastking"
-              className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 outline-none ring-[#F6C453]/30 focus:ring"
+              className="input-clean"
             />
           </label>
 
           <label className="block text-sm">
-            <span className="mb-1 block text-zinc-300">House</span>
+            <span className="mb-1 block font-medium ink-soft">House</span>
             <select
               name="house"
               value={house}
               onChange={(event) => setHouse(event.target.value as (typeof HOUSE_IDS)[number])}
-              className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 outline-none ring-[#F6C453]/30 focus:ring"
+              className="input-clean"
             >
               {houseOptions.map((option) => (
-                <option key={option.id} value={option.id} className="bg-[#151723]">
+                <option key={option.id} value={option.id}>
                   {option.label}
                 </option>
               ))}
@@ -91,46 +91,46 @@ export default function ProfileSetupPage() {
 
           <div className="grid gap-4 md:grid-cols-2">
             <label className="block text-sm">
-              <span className="mb-1 block text-zinc-300">Grade Year</span>
+              <span className="mb-1 block font-medium ink-soft">Grade Year</span>
               <select
                 name="gradeYear"
                 defaultValue="9"
-                className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 outline-none ring-[#F6C453]/30 focus:ring"
+                className="input-clean"
               >
-                <option value="9" className="bg-[#151723]">9</option>
-                <option value="10" className="bg-[#151723]">10</option>
-                <option value="11" className="bg-[#151723]">11</option>
-                <option value="12" className="bg-[#151723]">12</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
               </select>
             </label>
             <label className="block text-sm">
-              <span className="mb-1 block text-zinc-300">Favourite Subject</span>
+              <span className="mb-1 block font-medium ink-soft">Favourite Subject</span>
               <input
                 name="favouriteSubject"
                 type="text"
                 placeholder="Math"
-                className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 outline-none ring-[#F6C453]/30 focus:ring"
+                className="input-clean"
               />
             </label>
           </div>
 
           <label className="block text-sm">
-            <span className="mb-1 block text-zinc-300">Bio</span>
+            <span className="mb-1 block font-medium ink-soft">Bio</span>
             <textarea
               name="bio"
               rows={3}
               maxLength={160}
               placeholder="I track form, schedule strength, and late-line momentum."
-              className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 outline-none ring-[#F6C453]/30 focus:ring"
+              className="input-clean"
             />
           </label>
 
-          {error ? <p className="text-sm text-rose-300">{error}</p> : null}
+          {error ? <p className="text-sm font-medium text-[var(--accent-red)]">{error}</p> : null}
 
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full rounded-xl bg-[#F6C453] px-4 py-3 text-sm font-bold text-[#1B1F3A] disabled:cursor-not-allowed disabled:opacity-70"
+            className="btn-primary w-full px-4 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-70"
           >
             {isSubmitting ? "Submitting..." : "Submit for Approval"}
           </button>

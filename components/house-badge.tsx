@@ -23,11 +23,11 @@ export function HouseBadge({ house, rank, totalPoints, className }: HouseBadgePr
     <span
       title={title}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold tracking-wide",
+        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold tracking-wide shadow-[0_8px_16px_-14px_rgba(26,22,21,0.75)]",
         textClassForHouse(house),
         className,
       )}
-      style={{ backgroundColor: details.colourHex }}
+      style={{ backgroundColor: details.colourHex, borderColor: "rgba(0,0,0,0.08)" }}
     >
       <span
         aria-hidden

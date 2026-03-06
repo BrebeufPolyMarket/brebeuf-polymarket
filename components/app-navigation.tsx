@@ -20,19 +20,19 @@ export function AppNavigation({ viewer }: AppNavigationProps) {
 
   return (
     <>
-      <aside className="hidden min-h-[calc(100vh-2rem)] w-64 shrink-0 rounded-2xl border border-white/10 bg-[#151723] p-4 lg:block">
-        <Link href="/home" className="mb-6 block text-sm font-black tracking-[0.2em] text-[#F6C453]">
+      <aside className="surface hidden min-h-[calc(100vh-2rem)] w-64 shrink-0 p-4 lg:block">
+        <Link href="/home" className="mb-6 block text-xs font-bold tracking-[0.2em] text-[var(--accent-blue)]">
           BREBEUF POLYMARKET
         </Link>
 
         {viewer ? (
-          <div className="mb-5 rounded-xl border border-white/10 bg-white/5 p-3">
-            <p className="text-xs text-zinc-400">Signed in as</p>
-            <p className="mt-1 text-sm font-semibold text-zinc-200">{viewer.username}</p>
+          <div className="surface-soft mb-5 p-3">
+            <p className="text-xs muted">Signed in as</p>
+            <p className="mt-1 text-sm font-semibold text-[var(--ink)]">{viewer.username}</p>
             <div className="mt-2">
               <HouseBadge house={viewer.house} />
             </div>
-            <p className="mt-2 text-xs text-zinc-300">Balance: {viewer.pointsBalance.toLocaleString()} pts</p>
+            <p className="mt-2 text-xs ink-soft">Balance: {viewer.pointsBalance.toLocaleString()} pts</p>
           </div>
         ) : null}
 
@@ -44,7 +44,7 @@ export function AppNavigation({ viewer }: AppNavigationProps) {
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-zinc-300 transition hover:bg-white/10 hover:text-white"
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-[var(--ink-soft)] transition hover:bg-[var(--surface-soft)] hover:text-[var(--ink)]"
               >
                 <Icon className="h-4 w-4" />
                 {item.label}
@@ -54,7 +54,10 @@ export function AppNavigation({ viewer }: AppNavigationProps) {
         </nav>
       </aside>
 
-      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-white/10 bg-[#101321]/95 p-2 backdrop-blur lg:hidden">
+      <nav
+        className="fixed inset-x-0 bottom-0 z-30 border-t border-[var(--surface-stroke)] p-2 backdrop-blur lg:hidden"
+        style={{ background: "rgba(255, 255, 255, 0.9)" }}
+      >
         <ul className="mx-auto grid max-w-xl grid-cols-5 gap-1">
           {navItems.slice(0, 5).map((item) => {
             const Icon = item.icon;
@@ -63,7 +66,7 @@ export function AppNavigation({ viewer }: AppNavigationProps) {
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  className="flex min-h-11 flex-col items-center justify-center rounded-lg text-[10px] text-zinc-300 hover:bg-white/10"
+                  className="flex min-h-11 flex-col items-center justify-center rounded-lg text-[10px] text-[var(--ink-soft)] hover:bg-[var(--surface-soft)]"
                 >
                   <Icon className="mb-0.5 h-4 w-4" />
                   {item.label}
