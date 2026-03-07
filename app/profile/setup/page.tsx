@@ -124,7 +124,7 @@ export default function ProfileSetupPage() {
       return;
     }
 
-    router.push(data?.redirectTo ?? "/");
+    router.push(data?.redirectTo ?? "/home");
     router.refresh();
   }
 

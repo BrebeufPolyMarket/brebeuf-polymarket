@@ -16,6 +16,14 @@ const AUTH_REQUIRED_PREFIXES = [
   "/admin",
 ];
 
+const PENDING_ALLOWED_PREFIXES = [
+  "/home",
+  "/market",
+  "/leaderboard",
+  "/pending",
+  "/profile/setup",
+];
+
 function startsWithAny(pathname: string, prefixes: string[]) {
   return prefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
 }
@@ -61,8 +69,8 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/home", request.url));
   }
 
-  if (profile.status === "pending" && !pathname.startsWith("/pending") && !pathname.startsWith("/profile/setup")) {
-    return NextResponse.redirect(new URL("/pending", request.url));
+  if (profile.status === "pending" && !startsWithAny(pathname, PENDING_ALLOWED_PREFIXES)) {
+    return NextResponse.redirect(new URL("/home", request.url));
   }
 
   if (profile.status === "banned" && !pathname.startsWith("/banned")) {

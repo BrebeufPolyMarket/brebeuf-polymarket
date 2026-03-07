@@ -61,7 +61,7 @@ export async function POST(request: Request) {
   }
 
   if (profile.status === "pending") {
-    return NextResponse.json({ ok: true, redirectTo: "/pending" });
+    return NextResponse.json({ ok: true, redirectTo: "/home" });
   }
 
   if (profile.status === "banned") {

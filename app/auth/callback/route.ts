@@ -45,7 +45,7 @@ export async function GET(request: Request) {
   }
 
   if (profile.status === "pending") {
-    return NextResponse.redirect(new URL("/pending", request.url));
+    return NextResponse.redirect(new URL("/home", request.url));
   }
 
   if (profile.status === "banned") {
