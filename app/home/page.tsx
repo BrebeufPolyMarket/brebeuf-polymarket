@@ -7,6 +7,7 @@ import { AuthenticatedShell } from "@/components/authenticated-shell";
 import { SchoolLogo } from "@/components/branding/school-logo";
 import { HomeMarketGrid } from "@/components/home/home-market-grid";
 import { HouseCupWidget } from "@/components/house-cup-widget";
+import { RecommendMarketBubble } from "@/components/landing/recommend-market-bubble";
 import { LiveActivityPanel } from "@/components/live-activity-panel";
 import { LoadingState } from "@/components/loading-state";
 import { Reveal } from "@/components/motion/reveal";
@@ -82,6 +83,16 @@ export default function HomeFeedPage() {
         ) : null}
 
         <HomeMarketGrid markets={markets} />
+
+        <Reveal as="section" className="surface mt-2 p-5" delay={0.86} variant="spring">
+          <h2 className="text-base font-bold text-[var(--ink)]">Got a market idea?</h2>
+          <p className="mt-1 text-sm muted">
+            Students can recommend ideas here. Admins review and publish official markets.
+          </p>
+          <div className="mt-3">
+            <RecommendMarketBubble viewer={viewer} placement="inline" />
+          </div>
+        </Reveal>
       </div>
 
       <aside className="hidden w-80 shrink-0 space-y-4 xl:block">

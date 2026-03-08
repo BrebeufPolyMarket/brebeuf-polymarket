@@ -11,9 +11,10 @@ const CATEGORY_OPTIONS = ["Sports", "Campus", "Pop Culture", "Academic", "Other"
 
 type RecommendMarketBubbleProps = {
   viewer: ViewerProfile | null;
+  placement?: "fixed" | "inline";
 };
 
-export function RecommendMarketBubble({ viewer }: RecommendMarketBubbleProps) {
+export function RecommendMarketBubble({ viewer, placement = "fixed" }: RecommendMarketBubbleProps) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -107,7 +108,11 @@ export function RecommendMarketBubble({ viewer }: RecommendMarketBubbleProps) {
     <>
       <button
         type="button"
-        className="fixed bottom-6 right-4 z-40 flex items-center gap-2 rounded-full border border-[var(--accent-blue)]/45 bg-white px-4 py-2.5 text-sm font-semibold text-[var(--accent-blue)] shadow-[0_16px_28px_-20px_rgba(21,108,194,0.8)] transition hover:-translate-y-0.5 hover:bg-[color-mix(in_srgb,#fff_68%,#e2ecf5_32%)] md:right-6"
+        className={
+          placement === "fixed"
+            ? "fixed bottom-6 right-4 z-40 flex items-center gap-2 rounded-full border border-[var(--accent-blue)]/45 bg-white px-4 py-2.5 text-sm font-semibold text-[var(--accent-blue)] shadow-[0_16px_28px_-20px_rgba(21,108,194,0.8)] transition hover:-translate-y-0.5 hover:bg-[color-mix(in_srgb,#fff_68%,#e2ecf5_32%)] md:right-6"
+            : "btn-primary inline-flex items-center gap-2 px-5 py-2.5 text-sm"
+        }
         onClick={() => {
           if (!isAuthenticated) {
             router.push("/auth/login");
