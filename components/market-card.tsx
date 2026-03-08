@@ -13,6 +13,7 @@ type MarketCardProps = {
 export function MarketCard({ market, readOnly = false }: MarketCardProps) {
   const probability = market.yesPercent / 100;
   const showBookmark = !readOnly && typeof market.isWatchlisted === "boolean";
+  const isMulti = market.marketType === "multi";
 
   return (
     <article
@@ -23,6 +24,7 @@ export function MarketCard({ market, readOnly = false }: MarketCardProps) {
       <div className="mb-3 flex items-center justify-between gap-3">
         <span className="pill">{market.category}</span>
         <div className="flex items-center gap-2">
+          {isMulti ? <span className="pill border-[var(--accent-gold)]/35 text-[var(--accent-gold)]">MULTI</span> : null}
           <span className="flex items-center gap-1 text-[11px] font-semibold text-[var(--ink-muted)]">
             {market.isHot && <span>HOT</span>}
             {market.isNew && <span>NEW</span>}
@@ -46,12 +48,16 @@ export function MarketCard({ market, readOnly = false }: MarketCardProps) {
           >
             {market.yesPercent}%
           </div>
-          <div className="text-xs muted">{confidenceLabel(probability)}</div>
+          <div className="text-xs muted">
+            {isMulti ? `${market.primaryOptionLabel ?? "Top"} leading` : confidenceLabel(probability)}
+          </div>
         </div>
 
         <div className="mt-3 h-2 overflow-hidden rounded-full bg-[#ebdfd8]">
           <div className="h-full bg-[var(--accent-green)]" style={{ width: `${market.yesPercent}%` }} />
         </div>
+
+        {isMulti ? <p className="mt-2 text-[11px] font-medium text-[var(--accent-gold)]">Trading for multi markets is coming soon.</p> : null}
 
         <div className="mt-4 grid grid-cols-4 gap-2 text-[11px] muted">
           <span>{market.volume.toLocaleString()} vol</span>

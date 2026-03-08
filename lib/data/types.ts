@@ -5,6 +5,8 @@ export type ViewerProfile = {
   email: string;
   username: string;
   house: HouseId;
+  avatarUrl: string | null;
+  profileCompletedAt: string | null;
   pointsBalance: number;
   lifetimeWon: number;
   winCount: number;
@@ -18,9 +20,11 @@ export type MarketCardData = {
   title: string;
   description: string;
   category: string;
+  marketType: "binary" | "multi";
   status: string;
   closeTime: string;
   yesPercent: number;
+  primaryOptionLabel?: string;
   volume: number;
   traderCount: number;
   closesIn: string;
@@ -44,6 +48,8 @@ export type MarketDetailData = {
   title: string;
   description: string;
   category: string;
+  marketType: "binary" | "multi";
+  isTradable: boolean;
   status: string;
   closeTime: string;
   feeRate: number;
@@ -52,12 +58,12 @@ export type MarketDetailData = {
   traderCount: number;
   resolutionCriteria: string;
   options: MarketOptionData[];
-  yesOption: MarketOptionData;
-  noOption: MarketOptionData;
-  yesPercent: number;
+  yesOption: MarketOptionData | null;
+  noOption: MarketOptionData | null;
+  yesPercent: number | null;
   snapshots: Array<{ recordedAt: string; yesProbability: number }>;
   activity: LiveActivityItem[];
-  comments: Array<{ id: string; content: string; createdAt: string; username: string; house: HouseId }>;
+  comments: Array<{ id: string; content: string; createdAt: string; username: string; avatarUrl: string | null; house: HouseId }>;
   isWatchlisted: boolean;
   currentUserPosition: {
     optionId: string;
@@ -80,6 +86,7 @@ export type HouseStandingData = {
 export type LiveActivityItem = {
   id: string;
   username: string;
+  avatarUrl: string | null;
   house: HouseId;
   side: "YES" | "NO";
   marketTitle: string;
@@ -89,7 +96,9 @@ export type LiveActivityItem = {
 
 export type LeaderboardRowData = {
   rank: number;
+  userId: string;
   username: string;
+  avatarUrl: string | null;
   house: HouseId;
   pointsBalance: number;
   lifetimeWon: number;
@@ -154,6 +163,7 @@ export type MarketRecommendationRow = {
 export type AdminMarketRow = {
   id: string;
   title: string;
+  marketType: "binary" | "multi";
   status: string;
   closeTime: string;
   totalVolume: number;
@@ -202,8 +212,10 @@ export type NotificationPreferences = {
 };
 
 export type SettingsProfileData = {
+  viewer: ViewerProfile;
   userId: string;
   username: string;
+  avatarUrl: string | null;
   house: HouseId;
   status: "pending" | "active" | "banned";
   fullName: string;
@@ -212,4 +224,52 @@ export type SettingsProfileData = {
   bio: string;
   notifications: NotificationPreferences;
   unreadNotificationCount: number;
+};
+
+export type PublicProfileTradeRow = {
+  id: string;
+  type: string;
+  marketTitle: string | null;
+  pointsDelta: number;
+  createdAt: string;
+};
+
+export type PublicProfileData = {
+  userId: string;
+  username: string;
+  avatarUrl: string | null;
+  house: HouseId;
+  bio: string;
+  gradeYear: number | null;
+  favouriteSubject: string;
+  pointsBalance: number;
+  lifetimeWon: number;
+  winRate: number;
+  biggestWin: number;
+  trades: PublicProfileTradeRow[];
+};
+
+export type PendingApprovalRow = {
+  id: string;
+  email: string;
+  username: string;
+  fullName: string;
+  house: HouseId;
+  gradeYear: number | null;
+  bio: string;
+  createdAt: string;
+};
+
+export type AdminUserRow = {
+  id: string;
+  email: string;
+  username: string;
+  fullName: string;
+  avatarUrl: string | null;
+  house: HouseId;
+  gradeYear: number | null;
+  status: "pending" | "active" | "banned";
+  pointsBalance: number;
+  lifetimeWon: number;
+  createdAt: string;
 };

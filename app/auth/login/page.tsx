@@ -127,13 +127,13 @@ export default function LoginPage() {
 
     const { data: profile } = await supabase
       .from("users")
-      .select("status")
+      .select("status, username, profile_completed_at")
       .eq("id", signIn.data.user.id)
       .maybeSingle();
 
     setIsSubmitting(false);
 
-    if (!profile) {
+    if (!profile || !profile.profile_completed_at) {
       router.push("/profile/setup");
       router.refresh();
       return;
@@ -141,6 +141,12 @@ export default function LoginPage() {
 
     if (profile.status === "banned") {
       router.push("/banned");
+      router.refresh();
+      return;
+    }
+
+    if (profile.status === "pending") {
+      router.push("/pending");
       router.refresh();
       return;
     }

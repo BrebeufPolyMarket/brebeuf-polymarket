@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { AuthenticatedShell } from "@/components/authenticated-shell";
 import { MarketCard } from "@/components/market-card";
 import { Reveal } from "@/components/motion/reveal";
 import { PendingStatusListener } from "@/components/realtime/pending-status-listener";
@@ -33,6 +34,10 @@ export default function PendingApprovalPage() {
         router.push("/auth/login");
         return;
       }
+      if (!viewerData.profileCompletedAt) {
+        router.push("/profile/setup");
+        return;
+      }
       if (viewerData.status === "active") {
         router.push("/home");
       } else if (viewerData.status === "banned") {
@@ -48,19 +53,19 @@ export default function PendingApprovalPage() {
 
   if (loading) {
     return (
-      <main className="app-shell grid min-h-screen place-items-center px-6">
+      <AuthenticatedShell viewer={viewer}>
         <article className="surface max-w-md p-6 text-center">
           <h1 className="text-xl font-black text-[var(--ink)]">Loading Pending Status...</h1>
         </article>
-      </main>
+      </AuthenticatedShell>
     );
   }
 
   return (
-    <main className="app-shell px-6 py-10 md:px-10">
+    <AuthenticatedShell viewer={viewer}>
       {viewer ? <PendingStatusListener userId={viewer.id} /> : null}
 
-      <section className="mx-auto max-w-6xl">
+      <section className="mx-auto max-w-6xl px-2">
         <Reveal className="surface border-[var(--accent-gold)]/35 bg-[color-mix(in_srgb,#fff_74%,#f4e6da_26%)] p-5" delay={0.5} variant="spring">
           <h1 className="text-xl font-bold text-[var(--ink)]">Account Pending Approval</h1>
           <p className="mt-2 text-sm ink-soft">
@@ -85,6 +90,6 @@ export default function PendingApprovalPage() {
           ) : null}
         </div>
       </section>
-    </main>
+    </AuthenticatedShell>
   );
 }

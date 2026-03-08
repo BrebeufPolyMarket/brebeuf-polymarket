@@ -5,14 +5,17 @@ import type {
   AdminDashboardData,
   AdminRecommendationsData,
   AdminResolveMarketData,
+  AdminUserRow,
   HouseStandingData,
   LeaderboardRowData,
   LiveActivityItem,
   MarketCardData,
   MarketDetailData,
   MarketRecommendationRow,
+  PendingApprovalRow,
   PortfolioData,
   PortfolioRow,
+  PublicProfileData,
   SettingsProfileData,
   TransactionRow,
   ViewerProfile,
@@ -38,6 +41,27 @@ function asNumber(value: unknown, fallback = 0) {
 
 function asString(value: unknown, fallback = "") {
   return typeof value === "string" ? value : fallback;
+}
+
+function getPrimaryOption(options: DataRow[]) {
+  if (options.length === 0) {
+    return { percent: 50, label: "N/A" };
+  }
+
+  const yesOption = options.find((option) => asString(option.label).toUpperCase() === "YES");
+  if (yesOption) {
+    return {
+      percent: Math.round(asNumber(yesOption.probability, 0.5) * 100),
+      label: "YES",
+    };
+  }
+
+  const sorted = [...options].sort((a, b) => asNumber(b.probability, 0) - asNumber(a.probability, 0));
+  const top = sorted[0];
+  return {
+    percent: Math.round(asNumber(top?.probability, 0.5) * 100),
+    label: asString(top?.label, "Top"),
+  };
 }
 
 function formatTimeRemaining(closeTime: string) {
@@ -100,7 +124,7 @@ async function getContext() {
 
   const { data: profile } = await supabase
     .from("users")
-    .select("id, email, username, house, points_balance, lifetime_won, win_count, loss_count, status, is_admin")
+    .select("id, email, username, house, avatar_url, profile_completed_at, points_balance, lifetime_won, win_count, loss_count, status, is_admin")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -110,6 +134,8 @@ async function getContext() {
         email: profile.email,
         username: profile.username,
         house: toHouseId(profile.house),
+        avatarUrl: profile.avatar_url ? asString(profile.avatar_url) : null,
+        profileCompletedAt: profile.profile_completed_at ? asString(profile.profile_completed_at) : null,
         pointsBalance: asNumber(profile.points_balance),
         lifetimeWon: asNumber(profile.lifetime_won),
         winCount: asNumber(profile.win_count),
@@ -136,6 +162,7 @@ function mapActivityRow(row: Record<string, unknown>): LiveActivityItem {
   return {
     id: asString(row?.id),
     username: asString(userData?.username, "Unknown"),
+    avatarUrl: userData?.avatar_url ? asString(userData.avatar_url) : null,
     house: toHouseId(userData?.house),
     side,
     marketTitle: asString(marketData?.title, "Unknown Market"),
@@ -165,9 +192,8 @@ export async function getHomeFeedData() {
   const { data: marketsRaw } = await supabase
     .from("markets")
     .select(
-      "id, title, description, category, status, is_featured, close_time, created_at, total_volume, trader_count, resolution_criteria, market_options(id, label, probability)",
+      "id, title, description, category, type, status, is_featured, close_time, created_at, total_volume, trader_count, resolution_criteria, market_options(id, label, probability)",
     )
-    .eq("type", "binary")
     .in("status", ["active", "closed"])
     .order("is_featured", { ascending: false })
     .order("total_volume", { ascending: false })
@@ -202,13 +228,11 @@ export async function getHomeFeedData() {
 
   const markets: MarketCardData[] = (marketsRaw ?? []).flatMap((market: DataRow) => {
     const options = Array.isArray(market.market_options) ? market.market_options : [];
-    const yes = options.find((option: DataRow) => asString(option.label).toUpperCase() === "YES");
-
-    if (!yes) {
+    if (options.length === 0) {
       return [];
     }
-
-    const yesPercent = Math.round(asNumber(yes.probability, 0.5) * 100);
+    const marketType: MarketCardData["marketType"] = asString(market.type, "binary") === "multi" ? "multi" : "binary";
+    const primary = getPrimaryOption(options);
     const createdAt = new Date(asString(market.created_at, new Date().toISOString()));
 
     return [
@@ -217,9 +241,11 @@ export async function getHomeFeedData() {
         title: asString(market.title),
         description: asString(market.description),
         category: asString(market.category),
+        marketType,
         status: asString(market.status),
         closeTime: asString(market.close_time),
-        yesPercent,
+        yesPercent: primary.percent,
+        primaryOptionLabel: primary.label,
         volume: asNumber(market.total_volume),
         traderCount: asNumber(market.trader_count),
         closesIn: formatTimeRemaining(asString(market.close_time)),
@@ -270,7 +296,7 @@ export async function getHomeFeedData() {
 
   const { data: activityRaw } = await supabase
     .from("transactions")
-    .select("id, type, points_delta, created_at, users(username, house), markets(title), market_options(label)")
+    .select("id, type, points_delta, created_at, users(username, avatar_url, house), markets(title), market_options(label)")
     .in("type", ["buy", "sell"])
     .order("created_at", { ascending: false })
     .limit(25);
@@ -301,9 +327,8 @@ export async function getLandingMarketBoardData() {
   const { data: marketsRaw } = await supabase
     .from("markets")
     .select(
-      "id, title, description, category, status, is_featured, close_time, created_at, total_volume, trader_count, resolution_criteria, market_options(id, label, probability)",
+      "id, title, description, category, type, status, is_featured, close_time, created_at, total_volume, trader_count, resolution_criteria, market_options(id, label, probability)",
     )
-    .eq("type", "binary")
     .eq("status", "active")
     .order("close_time", { ascending: true })
     .order("total_volume", { ascending: false })
@@ -336,13 +361,11 @@ export async function getLandingMarketBoardData() {
 
   const markets: MarketCardData[] = (marketsRaw ?? []).flatMap((market: DataRow) => {
     const options = Array.isArray(market.market_options) ? market.market_options : [];
-    const yes = options.find((option: DataRow) => asString(option.label).toUpperCase() === "YES");
-
-    if (!yes) {
+    if (options.length === 0) {
       return [];
     }
-
-    const yesPercent = Math.round(asNumber(yes.probability, 0.5) * 100);
+    const marketType: MarketCardData["marketType"] = asString(market.type, "binary") === "multi" ? "multi" : "binary";
+    const primary = getPrimaryOption(options);
     const createdAt = new Date(asString(market.created_at, new Date().toISOString()));
 
     return [
@@ -351,9 +374,11 @@ export async function getLandingMarketBoardData() {
         title: asString(market.title),
         description: asString(market.description),
         category: asString(market.category),
+        marketType,
         status: asString(market.status),
         closeTime: asString(market.close_time),
-        yesPercent,
+        yesPercent: primary.percent,
+        primaryOptionLabel: primary.label,
         volume: asNumber(market.total_volume),
         traderCount: asNumber(market.trader_count),
         closesIn: formatTimeRemaining(asString(market.close_time)),
@@ -383,14 +408,16 @@ export async function getLeaderboardData() {
 
   const { data: usersRaw } = await supabase
     .from("users")
-    .select("username, house, points_balance, lifetime_won, win_count, loss_count, biggest_win")
+    .select("id, username, avatar_url, house, points_balance, lifetime_won, win_count, loss_count, biggest_win")
     .eq("status", "active")
     .order("points_balance", { ascending: false })
     .limit(100);
 
   const rows: LeaderboardRowData[] = (usersRaw ?? []).map((user: DataRow, index: number) => ({
     rank: index + 1,
+    userId: asString(user.id),
     username: asString(user.username),
+    avatarUrl: user.avatar_url ? asString(user.avatar_url) : null,
     house: toHouseId(user.house),
     pointsBalance: asNumber(user.points_balance),
     lifetimeWon: asNumber(user.lifetime_won),
@@ -421,10 +448,7 @@ export async function getMarketDetailData(marketId: string) {
     .maybeSingle();
 
   if (!marketRaw) return null;
-
-  if (asString(marketRaw.type) !== "binary") {
-    return null;
-  }
+  const marketType: MarketDetailData["marketType"] = asString(marketRaw.type, "binary") === "multi" ? "multi" : "binary";
 
   const options: MarketDetailData["options"] = Array.isArray(marketRaw.market_options)
     ? marketRaw.market_options.map((option: DataRow) => ({
@@ -437,27 +461,32 @@ export async function getMarketDetailData(marketId: string) {
 
   const yesOption = options.find((option) => option.label.toUpperCase() === "YES");
   const noOption = options.find((option) => option.label.toUpperCase() === "NO");
-
-  if (!yesOption || !noOption) {
-    return null;
-  }
+  const primary = (() => {
+    if (options.length === 0) return { percent: 50, label: "N/A" };
+    if (yesOption) return { percent: Math.round(yesOption.probability * 100), label: "YES" };
+    const top = [...options].sort((a, b) => b.probability - a.probability)[0];
+    return { percent: Math.round(top.probability * 100), label: top.label };
+  })();
+  const isTradable = marketType === "binary" && Boolean(yesOption && noOption);
 
   const { data: snapshotsRaw } = await supabase
     .from("probability_snapshots")
     .select("recorded_at, probability")
     .eq("market_id", marketId)
-    .eq("option_id", yesOption.id)
+    .eq("option_id", yesOption?.id ?? "")
     .order("recorded_at", { ascending: true })
     .limit(120);
 
-  const snapshots = (snapshotsRaw ?? []).map((row: DataRow) => ({
-    recordedAt: asString(row.recorded_at),
-    yesProbability: asNumber(row.probability, yesOption.probability),
-  }));
+  const snapshots = isTradable
+    ? (snapshotsRaw ?? []).map((row: DataRow) => ({
+        recordedAt: asString(row.recorded_at),
+        yesProbability: asNumber(row.probability, yesOption?.probability ?? 0.5),
+      }))
+    : [];
 
   const { data: activityRaw } = await supabase
     .from("transactions")
-    .select("id, type, points_delta, created_at, users(username, house), markets(title), market_options(label)")
+    .select("id, type, points_delta, created_at, users(username, avatar_url, house), markets(title), market_options(label)")
     .eq("market_id", marketId)
     .in("type", ["buy", "sell"])
     .order("created_at", { ascending: false })
@@ -467,7 +496,7 @@ export async function getMarketDetailData(marketId: string) {
 
   const { data: commentsRaw } = await supabase
     .from("comments")
-    .select("id, content, created_at, users(username, house)")
+    .select("id, content, created_at, users(username, avatar_url, house)")
     .eq("market_id", marketId)
     .is("parent_id", null)
     .order("created_at", { ascending: false })
@@ -480,6 +509,7 @@ export async function getMarketDetailData(marketId: string) {
       content: asString(comment.content),
       createdAt: asString(comment.created_at),
       username: asString(userData?.username, "Unknown"),
+      avatarUrl: userData?.avatar_url ? asString(userData.avatar_url) : null,
       house: toHouseId(userData?.house),
     };
   });
@@ -525,6 +555,8 @@ export async function getMarketDetailData(marketId: string) {
     title: asString(marketRaw.title),
     description: asString(marketRaw.description),
     category: asString(marketRaw.category),
+    marketType,
+    isTradable,
     status: asString(marketRaw.status),
     closeTime: asString(marketRaw.close_time),
     feeRate: asNumber(marketRaw.fee_rate, 0.02),
@@ -533,9 +565,9 @@ export async function getMarketDetailData(marketId: string) {
     traderCount: asNumber(marketRaw.trader_count),
     resolutionCriteria: asString(marketRaw.resolution_criteria),
     options,
-    yesOption,
-    noOption,
-    yesPercent: Math.round(yesOption.probability * 100),
+    yesOption: yesOption ?? null,
+    noOption: noOption ?? null,
+    yesPercent: isTradable ? Math.round((yesOption?.probability ?? 0.5) * 100) : primary.percent,
     snapshots,
     activity,
     comments,
@@ -638,7 +670,7 @@ export async function getWatchlistData() {
   const { data: watchlistRaw } = await supabase
     .from("watchlist")
     .select(
-      "id, market_id, created_at, markets(id, title, description, category, status, is_featured, close_time, created_at, total_volume, trader_count, resolution_criteria, market_options(id, label, probability))",
+      "id, market_id, created_at, markets(id, title, description, category, type, status, is_featured, close_time, created_at, total_volume, trader_count, resolution_criteria, market_options(id, label, probability))",
     )
     .eq("user_id", viewer.id)
     .order("created_at", { ascending: false })
@@ -665,9 +697,9 @@ export async function getWatchlistData() {
     if (!market) return [];
 
     const options = Array.isArray(market.market_options) ? market.market_options : [];
-    const yes = options.find((option: DataRow) => asString(option.label).toUpperCase() === "YES");
-
-    if (!yes) return [];
+    if (options.length === 0) return [];
+    const marketType: MarketCardData["marketType"] = asString(market.type, "binary") === "multi" ? "multi" : "binary";
+    const primary = getPrimaryOption(options);
 
     const marketId = asString(market.id);
     const createdAt = new Date(asString(market.created_at, new Date().toISOString()));
@@ -682,9 +714,11 @@ export async function getWatchlistData() {
           title: asString(market.title),
           description: asString(market.description),
           category: asString(market.category),
+          marketType,
           status: asString(market.status),
           closeTime: asString(market.close_time),
-          yesPercent: Math.round(asNumber(yes.probability, 0.5) * 100),
+          yesPercent: primary.percent,
+          primaryOptionLabel: primary.label,
           volume: asNumber(market.total_volume),
           traderCount: asNumber(market.trader_count),
           closesIn: formatTimeRemaining(asString(market.close_time)),
@@ -727,8 +761,10 @@ export async function getSettingsProfileData(): Promise<SettingsProfileData | nu
     .eq("read", false);
 
   return {
+    viewer,
     userId: asString(profile.id),
     username: asString(profile.username),
+    avatarUrl: profile.avatar_url ? asString(profile.avatar_url) : null,
     house: toHouseId(profile.house),
     status: status === "active" ? "active" : status === "banned" ? "banned" : "pending",
     fullName: asString(profile.full_name),
@@ -758,8 +794,7 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData | null
 
   const { data: marketsRaw } = await supabase
     .from("markets")
-    .select("id, title, status, close_time, total_volume")
-    .eq("type", "binary")
+    .select("id, title, type, status, close_time, total_volume")
     .in("status", ["active", "closed"])
     .order("close_time", { ascending: true })
     .limit(100);
@@ -767,6 +802,7 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData | null
   const markets = (marketsRaw ?? []).map((market: DataRow) => ({
     id: asString(market.id),
     title: asString(market.title),
+    marketType: asString(market.type, "binary") === "multi" ? "multi" : "binary",
     status: asString(market.status),
     closeTime: asString(market.close_time),
     totalVolume: asNumber(market.total_volume),
@@ -882,5 +918,111 @@ export async function getAdminResolveMarketData(marketId: string): Promise<Admin
     options,
     previewPositionCount: previewRows.length,
     previewTotalPayout,
+  };
+}
+
+export async function getPendingApprovalsData(): Promise<PendingApprovalRow[] | null> {
+  const { supabase, viewer } = await getContext();
+  if (!supabase || !isAdminViewer(viewer)) return null;
+
+  const { data } = await supabase
+    .from("users")
+    .select("id, email, username, full_name, house, grade_year, bio, created_at")
+    .eq("status", "pending")
+    .order("created_at", { ascending: true })
+    .limit(500);
+
+  return (data ?? []).map((row: DataRow) => ({
+    id: asString(row.id),
+    email: asString(row.email),
+    username: asString(row.username),
+    fullName: asString(row.full_name),
+    house: toHouseId(row.house),
+    gradeYear: typeof row.grade_year === "number" ? row.grade_year : null,
+    bio: asString(row.bio),
+    createdAt: asString(row.created_at),
+  }));
+}
+
+export async function getAdminUsersData(): Promise<AdminUserRow[] | null> {
+  const { supabase, viewer } = await getContext();
+  if (!supabase || !isAdminViewer(viewer)) return null;
+
+  const { data } = await supabase
+    .from("users")
+    .select("id, email, username, full_name, avatar_url, house, grade_year, status, points_balance, lifetime_won, created_at")
+    .order("created_at", { ascending: false })
+    .limit(1000);
+
+  return (data ?? []).map((row: DataRow) => ({
+    id: asString(row.id),
+    email: asString(row.email),
+    username: asString(row.username),
+    fullName: asString(row.full_name),
+    avatarUrl: row.avatar_url ? asString(row.avatar_url) : null,
+    house: toHouseId(row.house),
+    gradeYear: typeof row.grade_year === "number" ? row.grade_year : null,
+    status: asString(row.status) === "banned" ? "banned" : asString(row.status) === "active" ? "active" : "pending",
+    pointsBalance: asNumber(row.points_balance),
+    lifetimeWon: asNumber(row.lifetime_won),
+    createdAt: asString(row.created_at),
+  }));
+}
+
+export async function getPublicProfileData(username: string): Promise<PublicProfileData | null> {
+  const { supabase, viewer } = await getContext();
+  if (!supabase || !viewer) return null;
+
+  const normalized = username.trim().toLowerCase();
+  if (!normalized) return null;
+
+  const { data: profileRaw } = await supabase
+    .from("users")
+    .select("id, username, avatar_url, house, bio, grade_year, favourite_subject, points_balance, lifetime_won, win_count, loss_count, biggest_win, status")
+    .eq("username", normalized)
+    .maybeSingle();
+
+  if (!profileRaw) return null;
+  const targetStatus = asString(profileRaw.status);
+  const isSelf = profileRaw.id === viewer.id;
+  const canView =
+    viewer.isAdmin
+    || viewer.status === "active"
+    || (viewer.status === "pending" && isSelf);
+
+  if (!canView) return null;
+  if (!viewer.isAdmin && targetStatus !== "active" && !isSelf) return null;
+
+  const { data: txRaw } = await supabase
+    .from("transactions")
+    .select("id, type, points_delta, created_at, markets(title)")
+    .eq("user_id", profileRaw.id)
+    .order("created_at", { ascending: false })
+    .limit(20);
+
+  const trades = (txRaw ?? []).map((tx: DataRow) => {
+    const market = Array.isArray(tx.markets) ? tx.markets[0] : tx.markets;
+    return {
+      id: asString(tx.id),
+      type: asString(tx.type),
+      marketTitle: market?.title ? asString(market.title) : null,
+      pointsDelta: asNumber(tx.points_delta),
+      createdAt: asString(tx.created_at),
+    };
+  });
+
+  return {
+    userId: asString(profileRaw.id),
+    username: asString(profileRaw.username),
+    avatarUrl: profileRaw.avatar_url ? asString(profileRaw.avatar_url) : null,
+    house: toHouseId(profileRaw.house),
+    bio: asString(profileRaw.bio),
+    gradeYear: typeof profileRaw.grade_year === "number" ? profileRaw.grade_year : null,
+    favouriteSubject: asString(profileRaw.favourite_subject),
+    pointsBalance: asNumber(profileRaw.points_balance),
+    lifetimeWon: asNumber(profileRaw.lifetime_won),
+    winRate: deriveWinRate(asNumber(profileRaw.win_count), asNumber(profileRaw.loss_count)),
+    biggestWin: asNumber(profileRaw.biggest_win),
+    trades,
   };
 }

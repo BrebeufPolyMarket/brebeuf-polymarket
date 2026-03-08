@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { AuthenticatedShell } from "@/components/authenticated-shell";
 import { ProfileSettingsForm } from "@/components/settings/profile-settings-form";
 import { getSettingsProfileData } from "@/lib/data/browser-live";
 import type { SettingsProfileData } from "@/lib/data/types";
@@ -24,6 +25,10 @@ export default function SettingsPage() {
         router.push("/home");
         return;
       }
+      if (!data.viewer.profileCompletedAt) {
+        router.push("/profile/setup");
+        return;
+      }
 
       setSettings(data);
     }
@@ -36,27 +41,27 @@ export default function SettingsPage() {
 
   if (!loaded) {
     return (
-      <main className="app-shell grid min-h-screen place-items-center px-6">
+      <AuthenticatedShell viewer={settings?.viewer ?? null}>
         <article className="surface max-w-lg p-6 text-center">
           <h1 className="text-2xl font-black text-[var(--ink)]">Loading Settings...</h1>
         </article>
-      </main>
+      </AuthenticatedShell>
     );
   }
 
   if (!settings) {
     return (
-      <main className="app-shell grid min-h-screen place-items-center px-6">
+      <AuthenticatedShell viewer={null}>
         <article className="surface max-w-lg p-6 text-center">
           <h1 className="text-2xl font-black text-[var(--ink)]">Settings Unavailable</h1>
           <p className="mt-2 text-sm muted">Sign in with an active account to edit settings.</p>
         </article>
-      </main>
+      </AuthenticatedShell>
     );
   }
 
   return (
-    <main className="app-shell px-6 py-10 md:px-10">
+    <AuthenticatedShell viewer={settings.viewer}>
       <section className="mx-auto max-w-4xl">
         <h1 className="text-3xl font-black text-[var(--ink)]">Settings</h1>
         <p className="mt-2 text-sm muted">Manage private profile details and your notification preferences.</p>
@@ -65,6 +70,6 @@ export default function SettingsPage() {
           <ProfileSettingsForm initialData={settings} />
         </div>
       </section>
-    </main>
+    </AuthenticatedShell>
   );
 }

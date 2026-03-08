@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { HouseBadge } from "@/components/house-badge";
+import { UserAvatar } from "@/components/user-avatar";
 import type { LiveActivityItem } from "@/lib/data/types";
 
 type LiveActivityPanelProps = {
@@ -16,6 +17,7 @@ export function LiveActivityPanel({ items }: LiveActivityPanelProps) {
           <li key={item.id} className="surface-soft p-2 text-xs text-[var(--ink-soft)]">
             <div className="mb-1 flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
+                <UserAvatar username={item.username} house={item.house} avatarUrl={item.avatarUrl} size={22} />
                 <HouseBadge house={item.house} />
                 <span className="font-medium text-[var(--ink)]">{item.username}</span>
               </div>

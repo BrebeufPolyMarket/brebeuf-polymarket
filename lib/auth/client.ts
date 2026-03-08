@@ -35,7 +35,7 @@ export async function getViewerProfileClient(): Promise<ViewerLoadResult> {
 
   const { data: profile } = await supabase
     .from("users")
-    .select("id, email, username, house, points_balance, lifetime_won, win_count, loss_count, status, is_admin")
+    .select("id, email, username, house, avatar_url, profile_completed_at, points_balance, lifetime_won, win_count, loss_count, status, is_admin")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -50,6 +50,8 @@ export async function getViewerProfileClient(): Promise<ViewerLoadResult> {
       email: profile.email,
       username: profile.username,
       house: profile.house,
+      avatarUrl: profile.avatar_url ? String(profile.avatar_url) : null,
+      profileCompletedAt: profile.profile_completed_at ? String(profile.profile_completed_at) : null,
       pointsBalance: toNumber(profile.points_balance),
       lifetimeWon: toNumber(profile.lifetime_won),
       winCount: toNumber(profile.win_count),

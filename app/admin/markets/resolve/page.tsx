@@ -5,20 +5,21 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { ResolveActions } from "@/components/admin/resolve-actions";
-import { getAdminResolveMarketData } from "@/lib/data/browser-live";
-import type { AdminResolveMarketData } from "@/lib/data/types";
+import { AuthenticatedShell } from "@/components/authenticated-shell";
+import { getAdminResolveMarketData, getViewerProfile } from "@/lib/data/browser-live";
+import type { AdminResolveMarketData, ViewerProfile } from "@/lib/data/types";
 
-function AccessState({ message }: { message: string }) {
+function AccessState({ viewer, message }: { viewer: ViewerProfile | null; message: string }) {
   return (
-    <main className="app-shell grid min-h-screen place-items-center px-6">
-      <article className="surface max-w-md p-6 text-center">
+    <AuthenticatedShell viewer={viewer}>
+      <section className="mx-auto max-w-lg surface p-6 text-center">
         <h1 className="text-2xl font-black text-[var(--ink)]">Admin Access</h1>
         <p className="mt-2 text-sm muted">{message}</p>
-        <Link href="/admin" className="mt-4 inline-block text-sm font-semibold text-[var(--accent-blue)] hover:underline">
-          Back to Admin Dashboard
+        <Link href="/admin?tab=markets" className="btn-secondary mt-4 inline-block px-4 py-2 text-sm">
+          Back to Admin
         </Link>
-      </article>
-    </main>
+      </section>
+    </AuthenticatedShell>
   );
 }
 
@@ -27,6 +28,7 @@ function AdminResolveContent() {
   const searchParams = useSearchParams();
   const marketId = searchParams.get("id") ?? "";
 
+  const [viewer, setViewer] = useState<ViewerProfile | null>(null);
   const [data, setData] = useState<AdminResolveMarketData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -41,14 +43,24 @@ function AdminResolveContent() {
         return;
       }
 
-      const payload = await getAdminResolveMarketData(marketId);
+      const [viewerData, payload] = await Promise.all([
+        getViewerProfile(),
+        getAdminResolveMarketData(marketId),
+      ]);
+
       if (cancelled) return;
 
+      setViewer(viewerData);
       setData(payload);
       setLoading(false);
 
-      if (!payload) {
-        router.push("/admin");
+      if (!viewerData) {
+        router.push("/auth/login");
+        return;
+      }
+
+      if (!viewerData.isAdmin) {
+        router.push("/home");
       }
     }
 
@@ -60,20 +72,20 @@ function AdminResolveContent() {
 
   if (loading) {
     return (
-      <main className="app-shell grid min-h-screen place-items-center px-6">
-        <article className="surface max-w-md p-6 text-center">
+      <AuthenticatedShell viewer={viewer}>
+        <section className="mx-auto max-w-lg surface p-6 text-center">
           <h1 className="text-2xl font-black text-[var(--ink)]">Loading Market Review...</h1>
-        </article>
-      </main>
+        </section>
+      </AuthenticatedShell>
     );
   }
 
   if (!marketId || !data) {
-    return <AccessState message="Market not found or admin access is required." />;
+    return <AccessState viewer={viewer} message="Market not found or admin access is required." />;
   }
 
   return (
-    <main className="app-shell px-6 py-10 md:px-10">
+    <AuthenticatedShell viewer={viewer}>
       <section className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         <article className="surface space-y-4 p-5">
           <h1 className="text-2xl font-black text-[var(--ink)]">Resolve Market</h1>
@@ -93,7 +105,7 @@ function AdminResolveContent() {
           </div>
 
           <div className="surface-soft p-4">
-            <h3 className="text-sm font-semibold text-[var(--ink)]">Payout Preview (YES option baseline)</h3>
+            <h3 className="text-sm font-semibold text-[var(--ink)]">Payout Preview (YES baseline)</h3>
             <p className="mt-1 text-xs muted">
               Positions: {data.previewPositionCount.toLocaleString()} | Estimated payout: {data.previewTotalPayout.toLocaleString()} pts
             </p>
@@ -102,7 +114,7 @@ function AdminResolveContent() {
 
         <ResolveActions marketId={marketId} options={optionRows} />
       </section>
-    </main>
+    </AuthenticatedShell>
   );
 }
 
@@ -110,11 +122,11 @@ export default function AdminResolvePage() {
   return (
     <Suspense
       fallback={(
-        <main className="app-shell grid min-h-screen place-items-center px-6">
-          <article className="surface max-w-md p-6 text-center">
+        <AuthenticatedShell viewer={null}>
+          <section className="mx-auto max-w-lg surface p-6 text-center">
             <h1 className="text-2xl font-black text-[var(--ink)]">Loading Market Review...</h1>
-          </article>
-        </main>
+          </section>
+        </AuthenticatedShell>
       )}
     >
       <AdminResolveContent />

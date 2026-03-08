@@ -3,6 +3,7 @@ import { BarChart3, Home, LayoutList, Shield, Trophy, User } from "lucide-react"
 
 import { SchoolLogo } from "@/components/branding/school-logo";
 import { HouseBadge } from "@/components/house-badge";
+import { UserAvatar } from "@/components/user-avatar";
 import type { ViewerProfile } from "@/lib/data/types";
 
 type AppNavigationProps = {
@@ -10,12 +11,16 @@ type AppNavigationProps = {
 };
 
 export function AppNavigation({ viewer }: AppNavigationProps) {
+  const profileHref = viewer?.profileCompletedAt && viewer.username
+    ? `/profile/view?u=${encodeURIComponent(viewer.username)}`
+    : "/profile/setup";
+
   const navItems = [
     { href: "/home", label: "Home", icon: Home },
     { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
     { href: "/portfolio", label: "Portfolio", icon: BarChart3 },
     { href: "/watchlist", label: "Watchlist", icon: LayoutList },
-    { href: "/profile/setup", label: "Profile", icon: User },
+    { href: profileHref, label: "Profile", icon: User },
     ...(viewer?.isAdmin ? [{ href: "/admin", label: "Admin", icon: Shield }] : []),
   ];
 
@@ -30,7 +35,10 @@ export function AppNavigation({ viewer }: AppNavigationProps) {
         {viewer ? (
           <div className="surface-soft mb-5 p-3">
             <p className="text-xs muted">Signed in as</p>
-            <p className="mt-1 text-sm font-semibold text-[var(--ink)]">{viewer.username}</p>
+            <div className="mt-1 flex items-center gap-2">
+              <UserAvatar username={viewer.username} house={viewer.house} avatarUrl={viewer.avatarUrl} size={30} />
+              <p className="text-sm font-semibold text-[var(--ink)]">{viewer.username}</p>
+            </div>
             <div className="mt-2">
               <HouseBadge house={viewer.house} />
             </div>

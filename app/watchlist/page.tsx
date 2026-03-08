@@ -3,14 +3,16 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { AuthenticatedShell } from "@/components/authenticated-shell";
 import { Reveal } from "@/components/motion/reveal";
 import { MarketCard } from "@/components/market-card";
 import { getWatchlistData } from "@/lib/data/browser-live";
-import type { WatchlistMarketRow } from "@/lib/data/types";
+import type { ViewerProfile, WatchlistMarketRow } from "@/lib/data/types";
 
 export default function WatchlistPage() {
   const router = useRouter();
   const [items, setItems] = useState<WatchlistMarketRow[]>([]);
+  const [viewer, setViewer] = useState<ViewerProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -25,6 +27,11 @@ export default function WatchlistPage() {
         router.push("/home");
         return;
       }
+      setViewer(data.viewer);
+      if (!data.viewer.profileCompletedAt) {
+        router.push("/profile/setup");
+        return;
+      }
 
       setItems(data.items);
     }
@@ -37,16 +44,16 @@ export default function WatchlistPage() {
 
   if (loading) {
     return (
-      <main className="app-shell grid min-h-screen place-items-center px-6">
+      <AuthenticatedShell viewer={viewer}>
         <article className="surface max-w-lg p-6 text-center">
           <h1 className="text-2xl font-black text-[var(--ink)]">Loading Watchlist...</h1>
         </article>
-      </main>
+      </AuthenticatedShell>
     );
   }
 
   return (
-    <main className="app-shell px-6 py-10 md:px-10">
+    <AuthenticatedShell viewer={viewer}>
       <section className="mx-auto max-w-6xl">
         <Reveal delay={0.5} variant="spring">
           <h1 className="text-3xl font-black text-[var(--ink)]">Watchlist</h1>
@@ -71,6 +78,6 @@ export default function WatchlistPage() {
           ) : null}
         </div>
       </section>
-    </main>
+    </AuthenticatedShell>
   );
 }

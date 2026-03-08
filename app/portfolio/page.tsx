@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { AuthenticatedShell } from "@/components/authenticated-shell";
 import { PortfolioValueChart } from "@/components/charts/portfolio-value-chart";
 import { Reveal } from "@/components/motion/reveal";
 import { getPortfolioData } from "@/lib/data/browser-live";
@@ -28,6 +29,11 @@ export default function PortfolioPage() {
         return;
       }
 
+      if (!data.viewer.profileCompletedAt) {
+        router.push("/profile/setup");
+        return;
+      }
+
       if (data.viewer.status !== "active") {
         router.push("/home");
       }
@@ -41,29 +47,29 @@ export default function PortfolioPage() {
 
   if (!loaded) {
     return (
-      <main className="app-shell grid min-h-screen place-items-center px-6">
+      <AuthenticatedShell viewer={portfolio?.viewer ?? null}>
         <article className="surface max-w-lg p-6 text-center">
           <h1 className="text-2xl font-black text-[var(--ink)]">Loading Portfolio...</h1>
         </article>
-      </main>
+      </AuthenticatedShell>
     );
   }
 
   if (!portfolio) {
     return (
-      <main className="app-shell grid min-h-screen place-items-center px-6">
+      <AuthenticatedShell viewer={null}>
         <article className="surface max-w-lg p-6 text-center">
           <h1 className="text-2xl font-black text-[var(--ink)]">Portfolio Unavailable</h1>
           <p className="mt-2 text-sm muted">Sign in with an active account to view your positions and transaction history.</p>
         </article>
-      </main>
+      </AuthenticatedShell>
     );
   }
 
   const { viewer, openPositions, transactions, summary } = portfolio;
 
   return (
-    <main className="app-shell px-6 py-10 md:px-10">
+    <AuthenticatedShell viewer={viewer}>
       <section className="mx-auto max-w-6xl space-y-6">
         <Reveal as="header" delay={0.5} variant="spring">
           <h1 className="text-3xl font-black text-[var(--ink)]">My Portfolio</h1>
@@ -156,6 +162,6 @@ export default function PortfolioPage() {
           </div>
         </Reveal>
       </section>
-    </main>
+    </AuthenticatedShell>
   );
 }

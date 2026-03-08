@@ -1,23 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BellRing, CheckCircle2, Lock } from "lucide-react";
+import { useRouter } from "next/navigation";
 
+import { UserAvatar } from "@/components/user-avatar";
 import type { SettingsProfileData } from "@/lib/data/types";
 import { HOUSE_CONFIG } from "@/lib/houses";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const GRADE_OPTIONS = [9, 10, 11, 12] as const;
 
+function getFileExtension(fileName: string) {
+  const ext = fileName.split(".").pop()?.toLowerCase();
+  if (ext === "png" || ext === "jpg" || ext === "jpeg" || ext === "webp") return ext === "jpg" ? "jpeg" : ext;
+  return "jpeg";
+}
+
 type ProfileSettingsFormProps = {
   initialData: SettingsProfileData;
 };
 
 export function ProfileSettingsForm({ initialData }: ProfileSettingsFormProps) {
+  const router = useRouter();
   const [fullName, setFullName] = useState(initialData.fullName);
   const [gradeYear, setGradeYear] = useState<number | null>(initialData.gradeYear);
   const [favouriteSubject, setFavouriteSubject] = useState(initialData.favouriteSubject);
   const [bio, setBio] = useState(initialData.bio);
+
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(initialData.avatarUrl);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+
   const [notifyMarketClose, setNotifyMarketClose] = useState(initialData.notifications.notifyMarketClose);
   const [notifyWatchlistMove, setNotifyWatchlistMove] = useState(initialData.notifications.notifyWatchlistMove);
   const [notifyHouseEvents, setNotifyHouseEvents] = useState(initialData.notifications.notifyHouseEvents);
@@ -30,9 +44,47 @@ export function ProfileSettingsForm({ initialData }: ProfileSettingsFormProps) {
 
   const houseLabel = HOUSE_CONFIG[initialData.house]?.displayName ?? initialData.house;
 
+  useEffect(() => {
+    return () => {
+      if (avatarPreview) {
+        URL.revokeObjectURL(avatarPreview);
+      }
+    };
+  }, [avatarPreview]);
+
+  async function uploadAvatar(userId: string) {
+    if (!avatarFile) return avatarUrl;
+
+    const supabase = createSupabaseBrowserClient();
+    const extension = getFileExtension(avatarFile.name);
+    const storagePath = `${userId}/avatar.${extension}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(storagePath, avatarFile, { upsert: true, contentType: avatarFile.type });
+
+    if (uploadError) {
+      throw new Error(uploadError.message || "Avatar upload failed.");
+    }
+
+    const { data } = supabase.storage.from("avatars").getPublicUrl(storagePath);
+    return data.publicUrl;
+  }
+
   async function saveProfile() {
     setError(null);
     setNotice(null);
+
+    if (fullName.trim().length < 2 || fullName.trim().length > 80) {
+      setError("Full name must be between 2 and 80 characters.");
+      return;
+    }
+
+    if (bio.trim().length > 160) {
+      setError("Bio must be 160 characters or fewer.");
+      return;
+    }
+
     setIsSaving(true);
 
     const supabase = createSupabaseBrowserClient();
@@ -46,13 +98,24 @@ export function ProfileSettingsForm({ initialData }: ProfileSettingsFormProps) {
       return;
     }
 
-    const { error } = await supabase
+    let finalAvatarUrl = avatarUrl;
+
+    try {
+      finalAvatarUrl = await uploadAvatar(user.id);
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : "Avatar upload failed.");
+      setIsSaving(false);
+      return;
+    }
+
+    const { error: updateError } = await supabase
       .from("users")
       .update({
         full_name: fullName.trim(),
         grade_year: gradeYear,
         favourite_subject: favouriteSubject.trim() || null,
         bio: bio.trim() || null,
+        avatar_url: finalAvatarUrl,
         notify_market_close: notifyMarketClose,
         notify_watchlist_move: notifyWatchlistMove,
         notify_house_events: notifyHouseEvents,
@@ -62,12 +125,19 @@ export function ProfileSettingsForm({ initialData }: ProfileSettingsFormProps) {
 
     setIsSaving(false);
 
-    if (error) {
-      setError(error.message || "Unable to save settings.");
+    if (updateError) {
+      setError(updateError.message || "Unable to save settings.");
       return;
     }
 
+    setAvatarUrl(finalAvatarUrl ?? null);
+    setAvatarFile(null);
+    if (avatarPreview) {
+      URL.revokeObjectURL(avatarPreview);
+    }
+    setAvatarPreview(null);
     setNotice("Settings saved.");
+    router.refresh();
   }
 
   async function markAllRead() {
@@ -86,7 +156,7 @@ export function ProfileSettingsForm({ initialData }: ProfileSettingsFormProps) {
       return;
     }
 
-    const { error } = await supabase
+    const { error: notificationError } = await supabase
       .from("notifications")
       .update({ read: true })
       .eq("user_id", user.id)
@@ -94,8 +164,8 @@ export function ProfileSettingsForm({ initialData }: ProfileSettingsFormProps) {
 
     setIsMarkingRead(false);
 
-    if (error) {
-      setError(error.message || "Unable to mark notifications as read.");
+    if (notificationError) {
+      setError(notificationError.message || "Unable to mark notifications as read.");
       return;
     }
 
@@ -108,6 +178,66 @@ export function ProfileSettingsForm({ initialData }: ProfileSettingsFormProps) {
       <article className="surface p-6">
         <h2 className="text-xl font-bold text-[var(--ink)]">Profile Settings</h2>
         <p className="mt-2 text-sm muted">Your full name is private to admins. Public surfaces only show your username.</p>
+
+        <div className="mt-5 surface-soft p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.11em] text-[var(--accent-blue)]">Profile Picture</p>
+          <div className="mt-3 flex items-center gap-3">
+            <UserAvatar
+              username={initialData.username}
+              house={initialData.house}
+              avatarUrl={avatarPreview ?? avatarUrl}
+              size={56}
+            />
+            <div className="flex flex-wrap gap-2">
+              <label className="btn-secondary inline-flex cursor-pointer px-4 py-2 text-xs">
+                {avatarFile ? "Replace photo" : "Upload photo"}
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  className="hidden"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0] ?? null;
+                    if (!file) return;
+
+                    if (file.size > 3 * 1024 * 1024) {
+                      setError("Image must be 3MB or smaller.");
+                      return;
+                    }
+
+                    if (!/^image\/(png|jpeg|webp)$/.test(file.type)) {
+                      setError("Use PNG, JPEG, or WEBP.");
+                      return;
+                    }
+
+                    if (avatarPreview) {
+                      URL.revokeObjectURL(avatarPreview);
+                    }
+
+                    setError(null);
+                    setAvatarFile(file);
+                    setAvatarPreview(URL.createObjectURL(file));
+                  }}
+                />
+              </label>
+              {(avatarPreview || avatarUrl) ? (
+                <button
+                  type="button"
+                  className="btn-secondary px-4 py-2 text-xs"
+                  onClick={() => {
+                    if (avatarPreview) {
+                      URL.revokeObjectURL(avatarPreview);
+                    }
+                    setAvatarPreview(null);
+                    setAvatarFile(null);
+                    setAvatarUrl(null);
+                  }}
+                >
+                  Remove photo
+                </button>
+              ) : null}
+            </div>
+          </div>
+        </div>
 
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
           <div className="surface-soft p-3">
