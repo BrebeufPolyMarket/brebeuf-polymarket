@@ -1,24 +1,63 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Crown, Trophy } from "lucide-react";
 
 import { HouseLogo } from "@/components/branding/house-logo";
 import { SchoolLogo } from "@/components/branding/school-logo";
 import { HouseBadge } from "@/components/house-badge";
 import { Reveal } from "@/components/motion/reveal";
-import { RealtimeRefresh } from "@/components/realtime/realtime-refresh";
 import { HOUSE_CONFIG } from "@/lib/houses";
-import { getLeaderboardData } from "@/lib/data/live";
+import { getLeaderboardData } from "@/lib/data/browser-live";
+import type { HouseStandingData, LeaderboardRowData, ViewerProfile } from "@/lib/data/types";
 
-export const dynamic = "force-dynamic";
+type LeaderboardState = {
+  viewer: ViewerProfile | null;
+  rows: LeaderboardRowData[];
+  houses: HouseStandingData[];
+};
 
-export default async function LeaderboardPage() {
-  const { viewer, rows, houses } = await getLeaderboardData();
+export default function LeaderboardPage() {
+  const router = useRouter();
+  const [state, setState] = useState<LeaderboardState | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      const data = await getLeaderboardData();
+      if (cancelled) return;
+      setState(data);
+
+      if (!data.viewer) {
+        router.push("/auth/login");
+      } else if (data.viewer.status === "banned") {
+        router.push("/banned");
+      }
+    }
+
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
+
+  if (!state) {
+    return (
+      <main className="app-shell grid min-h-screen place-items-center px-6">
+        <article className="surface max-w-md p-6 text-center">
+          <h1 className="text-xl font-black text-[var(--ink)]">Loading Leaderboard...</h1>
+        </article>
+      </main>
+    );
+  }
+
+  const { viewer, rows, houses } = state;
   const sortedHouseStandings = [...houses].sort((a, b) => a.rank - b.rank);
 
   return (
     <main className="app-shell px-6 py-10 md:px-10">
-      <RealtimeRefresh channel="leaderboard-users" table="users" />
-      <RealtimeRefresh channel="leaderboard-houses" table="houses" />
-
       <section className="mx-auto max-w-6xl">
         <Reveal delay={0.5} variant="spring">
           <h1 className="inline-flex items-center gap-3 text-3xl font-black text-[var(--ink)]">
@@ -63,13 +102,6 @@ export default async function LeaderboardPage() {
                   <td className="px-4 py-3 tabular-nums ink-soft">{row.biggestWin.toLocaleString()}</td>
                 </tr>
               ))}
-              {rows.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-4 py-6 text-center text-sm muted">
-                    No leaderboard data yet.
-                  </td>
-                </tr>
-              ) : null}
             </tbody>
           </table>
         </Reveal>
@@ -77,7 +109,7 @@ export default async function LeaderboardPage() {
         {viewer ? (
           <Reveal className="mt-3" delay={0.85} variant="spring">
             <p className="text-xs muted">
-            Your current balance: {viewer.pointsBalance.toLocaleString()} pts | Lifetime won: {viewer.lifetimeWon.toLocaleString()} pts
+              Your current balance: {viewer.pointsBalance.toLocaleString()} pts | Lifetime won: {viewer.lifetimeWon.toLocaleString()} pts
             </p>
           </Reveal>
         ) : null}

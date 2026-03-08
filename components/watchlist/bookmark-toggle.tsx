@@ -4,6 +4,8 @@ import { useState, type MouseEvent } from "react";
 import { Bookmark } from "lucide-react";
 import { useRouter } from "next/navigation";
 
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+
 type BookmarkToggleProps = {
   marketId: string;
   initialBookmarked: boolean;
@@ -33,22 +35,31 @@ export function BookmarkToggle({
     setError(null);
     setIsLoading(true);
 
-    const method = bookmarked ? "DELETE" : "POST";
-    const response = await fetch("/api/watchlist", {
-      method,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        marketId,
-      }),
-    });
+    const supabase = createSupabaseBrowserClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    const data = await response.json().catch(() => null);
+    if (!user) {
+      setError("Sign in required.");
+      setIsLoading(false);
+      return;
+    }
+
+    const response = bookmarked
+      ? await supabase
+          .from("watchlist")
+          .delete()
+          .eq("user_id", user.id)
+          .eq("market_id", marketId)
+      : await supabase
+          .from("watchlist")
+          .insert({ user_id: user.id, market_id: marketId });
+
     setIsLoading(false);
 
-    if (!response.ok) {
-      setError(data?.message ?? "Could not update watchlist.");
+    if (response.error && response.error.code !== "23505") {
+      setError(response.error.message || "Could not update watchlist.");
       return;
     }
 

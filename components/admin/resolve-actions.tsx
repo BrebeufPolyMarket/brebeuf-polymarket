@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+
 type Option = {
   id: string;
   label: string;
@@ -31,18 +33,25 @@ export function ResolveActions({ marketId, options }: ResolveActionsProps) {
     setIsResolving(true);
     setMessage(null);
 
-    const response = await fetch(`/api/admin/markets/${marketId}/resolve`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(resolvePayload),
+    const supabase = createSupabaseBrowserClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      setMessage("Sign in required.");
+      setIsResolving(false);
+      return;
+    }
+
+    const { error } = await supabase.rpc("resolve_binary_market", {
+      p_market_id: marketId,
+      p_winning_option_id: resolvePayload.winningOptionId,
+      p_admin_id: user.id,
     });
 
-    const data = await response.json().catch(() => null);
-
-    if (!response.ok) {
-      setMessage(data?.message ?? "Failed to resolve market.");
+    if (error) {
+      setMessage(error.message || "Failed to resolve market.");
       setIsResolving(false);
       return;
     }
@@ -56,18 +65,25 @@ export function ResolveActions({ marketId, options }: ResolveActionsProps) {
     setIsCancelling(true);
     setMessage(null);
 
-    const response = await fetch(`/api/admin/markets/${marketId}/cancel`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ reason: cancelReason }),
+    const supabase = createSupabaseBrowserClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      setMessage("Sign in required.");
+      setIsCancelling(false);
+      return;
+    }
+
+    const { error } = await supabase.rpc("cancel_market", {
+      p_market_id: marketId,
+      p_admin_id: user.id,
+      p_reason: cancelReason,
     });
 
-    const data = await response.json().catch(() => null);
-
-    if (!response.ok) {
-      setMessage(data?.message ?? "Failed to cancel market.");
+    if (error) {
+      setMessage(error.message || "Failed to cancel market.");
       setIsCancelling(false);
       return;
     }

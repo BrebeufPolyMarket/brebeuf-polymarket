@@ -28,8 +28,8 @@ export function HouseLeadBanner() {
           table: "house_events",
           filter: "event_type=eq.house_lead_change",
         },
-        (payload) => {
-          const houseId = payload.new?.house_id;
+        (payload: { new: Record<string, unknown> }) => {
+          const houseId = typeof payload.new?.house_id === "string" ? payload.new.house_id : "";
           if (!isHouseId(houseId)) return;
 
           setEvent({

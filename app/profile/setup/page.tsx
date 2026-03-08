@@ -3,7 +3,9 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { isAllowedSchoolEmail } from "@/lib/auth/domain";
 import { HOUSE_CONFIG, HOUSE_IDS } from "@/lib/houses";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const TOTAL_STEPS = 6;
 const GRADE_OPTIONS = [9, 10, 11, 12] as const;
@@ -101,30 +103,66 @@ export default function ProfileSetupPage() {
     setIsSubmitting(true);
     setError(null);
 
-    const response = await fetch("/api/profile/setup", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        fullName: fullName.trim(),
-        username: username.trim(),
-        house,
-        gradeYear,
-        favouriteSubject: favouriteSubject.trim(),
-        bio: bio.trim(),
-      }),
-    });
+    const supabase = createSupabaseBrowserClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    const data = await response.json().catch(() => null);
-
-    if (!response.ok) {
-      setError(data?.message ?? "Unable to submit profile setup.");
+    if (!user) {
+      setError("Sign in is required.");
       setIsSubmitting(false);
       return;
     }
 
-    router.push(data?.redirectTo ?? "/home");
+    if (!isAllowedSchoolEmail(user.email)) {
+      await supabase.auth.signOut();
+      setError("A TCDSB school email is required.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    const { data: existing } = await supabase
+      .from("users")
+      .select("status")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (existing?.status === "active") {
+      router.push("/home");
+      router.refresh();
+      return;
+    }
+
+    const { error: upsertError } = await supabase.from("users").upsert(
+      {
+        id: user.id,
+        email: user.email,
+        full_name: fullName.trim(),
+        username: username.trim(),
+        house,
+        house_confirmed: false,
+        grade_year: gradeYear,
+        bio: bio.trim() || null,
+        favourite_subject: favouriteSubject.trim() || null,
+        status: "pending",
+        points_balance: 0,
+        is_admin: false,
+      },
+      { onConflict: "id" },
+    );
+
+    if (upsertError) {
+      if (upsertError.message.includes("users_username_key")) {
+        setError("Username is already in use.");
+      } else {
+        setError(upsertError.message);
+      }
+      setIsSubmitting(false);
+      return;
+    }
+
+    setIsSubmitting(false);
+    router.push("/home");
     router.refresh();
   }
 

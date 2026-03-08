@@ -1,7 +1,7 @@
 const DEFAULT_ALLOWED_EMAIL_DOMAIN = "tcdsb.ca";
 
 export function getAllowedEmailDomain() {
-  return (process.env.ALLOWED_EMAIL_DOMAIN ?? DEFAULT_ALLOWED_EMAIL_DOMAIN)
+  return (process.env.NEXT_PUBLIC_ALLOWED_EMAIL_DOMAIN ?? process.env.ALLOWED_EMAIL_DOMAIN ?? DEFAULT_ALLOWED_EMAIL_DOMAIN)
     .trim()
     .toLowerCase();
 }

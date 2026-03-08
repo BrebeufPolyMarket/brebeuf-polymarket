@@ -27,7 +27,7 @@ export function PendingStatusListener({ userId }: PendingStatusListenerProps) {
           table: "users",
           filter: `id=eq.${userId}`,
         },
-        (payload) => {
+        (payload: { new: Record<string, unknown> }) => {
           const status = String(payload.new?.status ?? "");
 
           if (status === "active") {

@@ -1,10 +1,48 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
 import { ProfileSettingsForm } from "@/components/settings/profile-settings-form";
-import { getSettingsProfileData } from "@/lib/data/live";
+import { getSettingsProfileData } from "@/lib/data/browser-live";
+import type { SettingsProfileData } from "@/lib/data/types";
 
-export const dynamic = "force-dynamic";
+export default function SettingsPage() {
+  const router = useRouter();
+  const [settings, setSettings] = useState<SettingsProfileData | null>(null);
+  const [loaded, setLoaded] = useState(false);
 
-export default async function SettingsPage() {
-  const settings = await getSettingsProfileData();
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      const data = await getSettingsProfileData();
+      if (cancelled) return;
+      setLoaded(true);
+
+      if (!data) {
+        router.push("/home");
+        return;
+      }
+
+      setSettings(data);
+    }
+
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
+
+  if (!loaded) {
+    return (
+      <main className="app-shell grid min-h-screen place-items-center px-6">
+        <article className="surface max-w-lg p-6 text-center">
+          <h1 className="text-2xl font-black text-[var(--ink)]">Loading Settings...</h1>
+        </article>
+      </main>
+    );
+  }
 
   if (!settings) {
     return (

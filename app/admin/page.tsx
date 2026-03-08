@@ -1,8 +1,11 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
-import { createSupabaseServerClient } from "@/lib/supabase/server";
-
-export const dynamic = "force-dynamic";
+import { getAdminDashboardData } from "@/lib/data/browser-live";
+import type { AdminDashboardData } from "@/lib/data/types";
 
 function AccessState({ message }: { message: string }) {
   return (
@@ -18,50 +21,52 @@ function AccessState({ message }: { message: string }) {
   );
 }
 
-export default async function AdminDashboardPage() {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+export default function AdminDashboardPage() {
+  const router = useRouter();
+  const [data, setData] = useState<AdminDashboardData | null>(null);
+  const [loaded, setLoaded] = useState(false);
 
-  if (!user) {
-    return <AccessState message="Sign in is required." />;
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      const payload = await getAdminDashboardData();
+      if (cancelled) return;
+
+      setData(payload);
+      setLoaded(true);
+
+      if (!payload) {
+        router.push("/home");
+      }
+    }
+
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
+
+  if (!loaded) {
+    return (
+      <main className="app-shell grid min-h-screen place-items-center px-6">
+        <article className="surface max-w-md p-6 text-center">
+          <h1 className="text-2xl font-black text-[var(--ink)]">Loading Admin Dashboard...</h1>
+        </article>
+      </main>
+    );
   }
 
-  const { data: profile } = await supabase
-    .from("users")
-    .select("is_admin")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  if (!profile?.is_admin) {
+  if (!data) {
     return <AccessState message="Admin access required." />;
   }
-
-  const { data: markets } = await supabase
-    .from("markets")
-    .select("id, title, status, close_time, total_volume")
-    .eq("type", "binary")
-    .in("status", ["active", "closed"])
-    .order("close_time", { ascending: true })
-    .limit(50);
-
-  const { count: pendingApprovals } = await supabase
-    .from("users")
-    .select("id", { count: "exact", head: true })
-    .eq("status", "pending");
-
-  const { count: openRecommendations } = await supabase
-    .from("market_recommendations")
-    .select("id", { count: "exact", head: true })
-    .eq("status", "open");
 
   return (
     <main className="app-shell px-6 py-10 md:px-10">
       <section className="mx-auto max-w-5xl">
         <h1 className="text-3xl font-black text-[var(--ink)]">Admin Dashboard</h1>
         <p className="mt-2 text-sm muted">
-          Pending approvals: {pendingApprovals ?? 0} | Open recommendations: {openRecommendations ?? 0}
+          Pending approvals: {data.pendingApprovals.toLocaleString()} | Open recommendations: {data.openRecommendations.toLocaleString()}
         </p>
 
         <div className="mt-4 grid gap-3 md:grid-cols-2">
@@ -71,7 +76,7 @@ export default async function AdminDashboardPage() {
               Review student-submitted market ideas before creating official markets.
             </p>
             <Link href="/admin/recommendations" className="btn-secondary mt-3 inline-block px-3 py-1.5 text-xs">
-              Review Recommendations ({openRecommendations ?? 0})
+              Review Recommendations ({data.openRecommendations.toLocaleString()})
             </Link>
           </article>
         </div>
@@ -88,19 +93,26 @@ export default async function AdminDashboardPage() {
               </tr>
             </thead>
             <tbody>
-              {(markets ?? []).map((market) => (
+              {data.markets.map((market) => (
                 <tr key={market.id}>
                   <td className="px-4 py-3 font-medium text-[var(--ink)]">{market.title}</td>
                   <td className="px-4 py-3 ink-soft">{market.status}</td>
-                  <td className="px-4 py-3 ink-soft">{new Date(market.close_time).toLocaleString()}</td>
-                  <td className="px-4 py-3 tabular-nums ink-soft">{market.total_volume.toLocaleString()}</td>
+                  <td className="px-4 py-3 ink-soft">{new Date(market.closeTime).toLocaleString()}</td>
+                  <td className="px-4 py-3 tabular-nums ink-soft">{market.totalVolume.toLocaleString()}</td>
                   <td className="px-4 py-3">
-                    <Link href={`/admin/markets/${market.id}/resolve`} className="btn-secondary px-3 py-1.5 text-xs">
+                    <Link href={`/admin/markets/resolve?id=${market.id}`} className="btn-secondary px-3 py-1.5 text-xs">
                       Resolve / Cancel
                     </Link>
                   </td>
                 </tr>
               ))}
+              {data.markets.length === 0 ? (
+                <tr>
+                  <td className="px-4 py-8 text-center text-sm muted" colSpan={5}>
+                    No active or closed binary markets found.
+                  </td>
+                </tr>
+              ) : null}
             </tbody>
           </table>
         </div>

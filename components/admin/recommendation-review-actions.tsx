@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+
 const REVIEW_STATUSES = ["under_review", "accepted", "rejected"] as const;
 
 type ReviewStatus = (typeof REVIEW_STATUSES)[number];
@@ -30,22 +32,28 @@ export function RecommendationReviewActions({
     setIsSaving(true);
     setMessage(null);
 
-    const response = await fetch(`/api/admin/recommendations/${recommendationId}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        status,
-        adminNotes: notes.trim() || undefined,
-      }),
+    const supabase = createSupabaseBrowserClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      setMessage("Sign in required.");
+      setIsSaving(false);
+      return;
+    }
+
+    const { error } = await supabase.rpc("review_market_recommendation", {
+      p_recommendation_id: recommendationId,
+      p_status: status,
+      p_admin_notes: notes.trim() || null,
+      p_admin_id: user.id,
     });
 
-    const data = await response.json().catch(() => null);
     setIsSaving(false);
 
-    if (!response.ok) {
-      setMessage(data?.message ?? "Update failed.");
+    if (error) {
+      setMessage(error.message || "Update failed.");
       return;
     }
 

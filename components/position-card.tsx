@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+
 type Position = {
   optionId: string;
   label: string;
@@ -35,23 +37,16 @@ export function PositionCard({ marketId, positions }: PositionCardProps) {
     setLoadingId(optionId);
     setMessage(null);
 
-    const response = await fetch("/api/sell", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        marketId,
-        optionId,
-        shares,
-        clientTxId: crypto.randomUUID(),
-      }),
+    const supabase = createSupabaseBrowserClient();
+    const { error } = await supabase.rpc("place_binary_sell", {
+      p_market_id: marketId,
+      p_option_id: optionId,
+      p_shares: shares,
+      p_client_tx_id: crypto.randomUUID(),
     });
 
-    const data = await response.json().catch(() => null);
-
-    if (!response.ok) {
-      setMessage(data?.message ?? "Sell failed.");
+    if (error) {
+      setMessage(error.message || "Sell failed.");
       setLoadingId(null);
       return;
     }

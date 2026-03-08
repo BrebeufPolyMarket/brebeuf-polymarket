@@ -1,20 +1,17 @@
-import { notFound } from "next/navigation";
+"use client";
+
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { BetPanel } from "@/components/bet-panel";
 import { YesProbabilityChart } from "@/components/charts/yes-probability-chart";
 import { HouseBadge } from "@/components/house-badge";
 import { Reveal } from "@/components/motion/reveal";
 import { PositionCard } from "@/components/position-card";
-import { RealtimeRefresh } from "@/components/realtime/realtime-refresh";
 import { BookmarkToggle } from "@/components/watchlist/bookmark-toggle";
 import { confidenceLabel } from "@/lib/lmsr";
-import { getMarketDetailData, getViewerProfile } from "@/lib/data/live";
-
-type MarketPageProps = {
-  params: Promise<{ id: string }>;
-};
-
-export const dynamic = "force-dynamic";
+import { getMarketDetailData, getViewerProfile } from "@/lib/data/browser-live";
+import type { MarketDetailData, ViewerProfile } from "@/lib/data/types";
 
 function statusLabel(status: string) {
   if (status === "active") return "Active";
@@ -24,16 +21,59 @@ function statusLabel(status: string) {
   return status;
 }
 
-export default async function MarketDetailPage({ params }: MarketPageProps) {
-  const { id } = await params;
+function MarketDetailContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const marketId = searchParams.get("id");
+  const [market, setMarket] = useState<MarketDetailData | null>(null);
+  const [viewer, setViewer] = useState<ViewerProfile | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const [market, viewer] = await Promise.all([
-    getMarketDetailData(id),
-    getViewerProfile(),
-  ]);
+  useEffect(() => {
+    let cancelled = false;
 
-  if (!market) {
-    notFound();
+    async function load() {
+      if (!marketId) {
+        setLoading(false);
+        return;
+      }
+
+      const [marketData, viewerData] = await Promise.all([
+        getMarketDetailData(marketId),
+        getViewerProfile(),
+      ]);
+
+      if (cancelled) return;
+      setMarket(marketData);
+      setViewer(viewerData);
+      setLoading(false);
+    }
+
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, [marketId, router]);
+
+  if (loading) {
+    return (
+      <main className="app-shell grid min-h-screen place-items-center px-6">
+        <article className="surface max-w-lg p-6 text-center">
+          <h1 className="text-2xl font-black text-[var(--ink)]">Loading Market...</h1>
+        </article>
+      </main>
+    );
+  }
+
+  if (!marketId || !market) {
+    return (
+      <main className="app-shell grid min-h-screen place-items-center px-6">
+        <article className="surface max-w-lg p-6 text-center">
+          <h1 className="text-2xl font-black text-[var(--ink)]">Market Not Found</h1>
+          <p className="mt-2 text-sm muted">Open a market from home or leaderboard.</p>
+        </article>
+      </main>
+    );
   }
 
   const probability = market.yesPercent / 100;
@@ -41,10 +81,6 @@ export default async function MarketDetailPage({ params }: MarketPageProps) {
 
   return (
     <main className="app-shell px-6 py-8 md:px-10">
-      <RealtimeRefresh channel={`market-options-${market.id}`} table="market_options" filter={`market_id=eq.${market.id}`} />
-      <RealtimeRefresh channel={`market-transactions-${market.id}`} table="transactions" filter={`market_id=eq.${market.id}`} />
-      <RealtimeRefresh channel={`market-comments-${market.id}`} table="comments" filter={`market_id=eq.${market.id}`} />
-
       <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[1fr_360px]">
         <section>
           <Reveal className="mb-4 flex flex-wrap items-center justify-between gap-3 text-xs" delay={0.5} variant="spring">
@@ -107,24 +143,6 @@ export default async function MarketDetailPage({ params }: MarketPageProps) {
                   </p>
                 </Reveal>
               ))}
-              {market.activity.length === 0 ? <p className="text-xs muted">No activity yet.</p> : null}
-            </div>
-          </Reveal>
-
-          <Reveal as="section" className="surface mt-6 p-5" delay={1} variant="spring">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.14em] ink-soft">Comments</h2>
-            <div className="mt-3 space-y-3">
-              {market.comments.map((comment, index) => (
-                <Reveal key={comment.id} as="article" className="surface-soft p-3 text-xs ink-soft" delay={0.54 + index * 0.04} variant="spring">
-                  <div className="mb-1 flex items-center gap-2">
-                    <HouseBadge house={comment.house} />
-                    <span className="font-semibold text-[var(--ink)]">{comment.username}</span>
-                    <span className="muted">{new Date(comment.createdAt).toLocaleString()}</span>
-                  </div>
-                  <p>{comment.content}</p>
-                </Reveal>
-              ))}
-              {market.comments.length === 0 ? <p className="text-xs muted">No comments yet.</p> : null}
             </div>
           </Reveal>
         </section>
@@ -156,5 +174,21 @@ export default async function MarketDetailPage({ params }: MarketPageProps) {
         </aside>
       </div>
     </main>
+  );
+}
+
+export default function MarketDetailPage() {
+  return (
+    <Suspense
+      fallback={(
+        <main className="app-shell grid min-h-screen place-items-center px-6">
+          <article className="surface max-w-lg p-6 text-center">
+            <h1 className="text-2xl font-black text-[var(--ink)]">Loading Market...</h1>
+          </article>
+        </main>
+      )}
+    >
+      <MarketDetailContent />
+    </Suspense>
   );
 }

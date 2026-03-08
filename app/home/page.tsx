@@ -1,23 +1,69 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
 import { AppNavigation } from "@/components/app-navigation";
 import { SchoolLogo } from "@/components/branding/school-logo";
 import { HomeMarketGrid } from "@/components/home/home-market-grid";
 import { HouseCupWidget } from "@/components/house-cup-widget";
 import { LiveActivityPanel } from "@/components/live-activity-panel";
 import { Reveal } from "@/components/motion/reveal";
-import { RealtimeRefresh } from "@/components/realtime/realtime-refresh";
-import { getHomeFeedData } from "@/lib/data/live";
+import { getHomeFeedData } from "@/lib/data/browser-live";
+import type { HouseStandingData, LiveActivityItem, MarketCardData, ViewerProfile } from "@/lib/data/types";
 
-export const dynamic = "force-dynamic";
+type HomeState = {
+  viewer: ViewerProfile | null;
+  featured: MarketCardData | null;
+  markets: MarketCardData[];
+  houses: HouseStandingData[];
+  activity: LiveActivityItem[];
+};
 
-export default async function HomeFeedPage() {
-  const { viewer, featured, markets, houses, activity } = await getHomeFeedData();
+export default function HomeFeedPage() {
+  const router = useRouter();
+  const [state, setState] = useState<HomeState | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      const data = await getHomeFeedData();
+      if (cancelled) return;
+      setState(data);
+      setIsLoading(false);
+
+      if (!data.viewer) {
+        router.push("/auth/login");
+        return;
+      }
+
+      if (data.viewer.status === "banned") {
+        router.push("/banned");
+      }
+    }
+
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
+
+  if (isLoading || !state) {
+    return (
+      <main className="app-shell grid min-h-screen place-items-center px-6">
+        <article className="surface max-w-md p-6 text-center">
+          <h1 className="text-xl font-black text-[var(--ink)]">Loading Home Feed...</h1>
+        </article>
+      </main>
+    );
+  }
+
+  const { viewer, featured, markets, houses, activity } = state;
 
   return (
     <main className="app-shell px-4 py-4 md:px-6 lg:px-8">
-      <RealtimeRefresh channel="home-markets" table="market_options" />
-      <RealtimeRefresh channel="home-houses" table="houses" />
-      <RealtimeRefresh channel="home-activity" table="transactions" />
-
       <div className="mx-auto flex max-w-[1500px] gap-4">
         <AppNavigation viewer={viewer} />
 

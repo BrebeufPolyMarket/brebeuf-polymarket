@@ -5,6 +5,7 @@ import { BellRing, CheckCircle2, Lock } from "lucide-react";
 
 import type { SettingsProfileData } from "@/lib/data/types";
 import { HOUSE_CONFIG } from "@/lib/houses";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const GRADE_OPTIONS = [9, 10, 11, 12] as const;
 
@@ -34,28 +35,35 @@ export function ProfileSettingsForm({ initialData }: ProfileSettingsFormProps) {
     setNotice(null);
     setIsSaving(true);
 
-    const response = await fetch("/api/settings/profile", {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        fullName: fullName.trim(),
-        gradeYear,
-        favouriteSubject: favouriteSubject.trim(),
-        bio: bio.trim(),
-        notifyMarketClose,
-        notifyWatchlistMove,
-        notifyHouseEvents,
-        notifyCommentReplies,
-      }),
-    });
+    const supabase = createSupabaseBrowserClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    const data = await response.json().catch(() => null);
+    if (!user) {
+      setError("Sign in required.");
+      setIsSaving(false);
+      return;
+    }
+
+    const { error } = await supabase
+      .from("users")
+      .update({
+        full_name: fullName.trim(),
+        grade_year: gradeYear,
+        favourite_subject: favouriteSubject.trim() || null,
+        bio: bio.trim() || null,
+        notify_market_close: notifyMarketClose,
+        notify_watchlist_move: notifyWatchlistMove,
+        notify_house_events: notifyHouseEvents,
+        notify_comment_replies: notifyCommentReplies,
+      })
+      .eq("id", user.id);
+
     setIsSaving(false);
 
-    if (!response.ok) {
-      setError(data?.message ?? "Unable to save settings.");
+    if (error) {
+      setError(error.message || "Unable to save settings.");
       return;
     }
 
@@ -67,24 +75,32 @@ export function ProfileSettingsForm({ initialData }: ProfileSettingsFormProps) {
     setNotice(null);
     setIsMarkingRead(true);
 
-    const response = await fetch("/api/settings/notifications/read-all", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({}),
-    });
+    const supabase = createSupabaseBrowserClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    const data = await response.json().catch(() => null);
+    if (!user) {
+      setError("Sign in required.");
+      setIsMarkingRead(false);
+      return;
+    }
+
+    const { error } = await supabase
+      .from("notifications")
+      .update({ read: true })
+      .eq("user_id", user.id)
+      .eq("read", false);
+
     setIsMarkingRead(false);
 
-    if (!response.ok) {
-      setError(data?.message ?? "Unable to mark notifications as read.");
+    if (error) {
+      setError(error.message || "Unable to mark notifications as read.");
       return;
     }
 
     setUnreadCount(0);
-    setNotice(data?.message ?? "Notifications marked as read.");
+    setNotice("Notifications marked as read.");
   }
 
   return (

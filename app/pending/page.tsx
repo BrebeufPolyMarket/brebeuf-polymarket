@@ -1,20 +1,63 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
 import { MarketCard } from "@/components/market-card";
 import { Reveal } from "@/components/motion/reveal";
 import { PendingStatusListener } from "@/components/realtime/pending-status-listener";
-import { RealtimeRefresh } from "@/components/realtime/realtime-refresh";
-import { getPendingMarketsData, getViewerProfile } from "@/lib/data/live";
+import { getPendingMarketsData, getViewerProfile } from "@/lib/data/browser-live";
+import type { MarketCardData, ViewerProfile } from "@/lib/data/types";
 
-export const dynamic = "force-dynamic";
+export default function PendingApprovalPage() {
+  const router = useRouter();
+  const [viewer, setViewer] = useState<ViewerProfile | null>(null);
+  const [markets, setMarkets] = useState<MarketCardData[]>([]);
+  const [loading, setLoading] = useState(true);
 
-export default async function PendingApprovalPage() {
-  const [markets, viewer] = await Promise.all([
-    getPendingMarketsData(),
-    getViewerProfile(),
-  ]);
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      const [viewerData, marketData] = await Promise.all([
+        getViewerProfile(),
+        getPendingMarketsData(),
+      ]);
+
+      if (cancelled) return;
+      setViewer(viewerData);
+      setMarkets(marketData);
+      setLoading(false);
+
+      if (!viewerData) {
+        router.push("/auth/login");
+        return;
+      }
+      if (viewerData.status === "active") {
+        router.push("/home");
+      } else if (viewerData.status === "banned") {
+        router.push("/banned");
+      }
+    }
+
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
+
+  if (loading) {
+    return (
+      <main className="app-shell grid min-h-screen place-items-center px-6">
+        <article className="surface max-w-md p-6 text-center">
+          <h1 className="text-xl font-black text-[var(--ink)]">Loading Pending Status...</h1>
+        </article>
+      </main>
+    );
+  }
 
   return (
     <main className="app-shell px-6 py-10 md:px-10">
-      <RealtimeRefresh channel="pending-markets" table="market_options" />
       {viewer ? <PendingStatusListener userId={viewer.id} /> : null}
 
       <section className="mx-auto max-w-6xl">

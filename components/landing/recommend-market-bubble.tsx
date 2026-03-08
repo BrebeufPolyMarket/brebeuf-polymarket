@@ -5,6 +5,7 @@ import { Lightbulb, MessageCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import type { ViewerProfile } from "@/lib/data/types";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const CATEGORY_OPTIONS = ["Sports", "Campus", "Pop Culture", "Academic", "Other"] as const;
 
@@ -64,24 +65,34 @@ export function RecommendMarketBubble({ viewer }: RecommendMarketBubbleProps) {
 
     setIsSubmitting(true);
 
-    const response = await fetch("/api/market-recommendations", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    const supabase = createSupabaseBrowserClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      setError("Sign in is required.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    const { error } = await supabase
+      .from("market_recommendations")
+      .insert({
+        user_id: user.id,
         title: title.trim(),
         description: description.trim(),
         category,
-        sourceUrl: sourceUrl.trim() || undefined,
-      }),
-    });
+        source_url: sourceUrl.trim() || null,
+        status: "open",
+      })
+      .select("id")
+      .single();
 
-    const data = await response.json().catch(() => null);
     setIsSubmitting(false);
 
-    if (!response.ok) {
-      setError(data?.message ?? "Unable to submit recommendation.");
+    if (error) {
+      setError(error.message || "Unable to submit recommendation.");
       return;
     }
 

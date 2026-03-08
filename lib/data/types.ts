@@ -151,6 +151,42 @@ export type MarketRecommendationRow = {
   reviewedAt: string | null;
 };
 
+export type AdminMarketRow = {
+  id: string;
+  title: string;
+  status: string;
+  closeTime: string;
+  totalVolume: number;
+};
+
+export type AdminDashboardData = {
+  viewer: ViewerProfile;
+  pendingApprovals: number;
+  openRecommendations: number;
+  markets: AdminMarketRow[];
+};
+
+export type AdminRecommendationsData = {
+  viewer: ViewerProfile;
+  openCount: number;
+  recommendations: MarketRecommendationRow[];
+};
+
+export type AdminResolveMarketData = {
+  viewer: ViewerProfile;
+  marketId: string;
+  title: string;
+  description: string;
+  status: string;
+  closeTime: string;
+  totalVolume: number;
+  feePool: number;
+  resolutionCriteria: string;
+  options: Array<{ id: string; label: string }>;
+  previewPositionCount: number;
+  previewTotalPayout: number;
+};
+
 export type WatchlistMarketRow = {
   id: string;
   marketId: string;

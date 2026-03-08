@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { sharesToReceive } from "@/lib/lmsr";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type BetPanelProps = {
   marketId: string;
@@ -53,23 +54,16 @@ export function BetPanel({
     setIsSubmitting(true);
     setMessage(null);
 
-    const response = await fetch("/api/bet", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        marketId,
-        optionId: isYes ? yesOptionId : noOptionId,
-        points,
-        clientTxId: crypto.randomUUID(),
-      }),
+    const supabase = createSupabaseBrowserClient();
+    const { error } = await supabase.rpc("place_binary_bet", {
+      p_market_id: marketId,
+      p_option_id: isYes ? yesOptionId : noOptionId,
+      p_points: points,
+      p_client_tx_id: crypto.randomUUID(),
     });
 
-    const data = await response.json().catch(() => null);
-
-    if (!response.ok) {
-      setMessage(data?.message ?? "Bet failed.");
+    if (error) {
+      setMessage(error.message || "Bet failed.");
       setIsSubmitting(false);
       return;
     }

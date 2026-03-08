@@ -5,6 +5,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, School, ShieldCheck } from "lucide-react";
 
+import { isAllowedSchoolEmail } from "@/lib/auth/domain";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+
 type AuthMode = "signin" | "signup";
 
 const ERROR_MESSAGES: Record<string, string> = {
@@ -68,39 +71,81 @@ export default function LoginPage() {
 
     setIsSubmitting(true);
 
-    const endpoint = mode === "signin" ? "/api/auth/sign-in" : "/api/auth/sign-up";
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: normalizedEmail,
-        password,
-      }),
-    });
-
-    const data = await response.json().catch(() => null);
-    setIsSubmitting(false);
-
-    if (!response.ok) {
-      setError(data?.message ?? "Authentication request failed.");
+    if (!isAllowedSchoolEmail(normalizedEmail)) {
+      setError("Use your TCDSB school email address.");
+      setIsSubmitting(false);
       return;
     }
 
+    const supabase = createSupabaseBrowserClient();
+
     if (mode === "signup") {
+      const signUp = await supabase.auth.signUp({
+        email: normalizedEmail,
+        password,
+      });
+
+      if (signUp.error) {
+        setError(signUp.error.message);
+        setIsSubmitting(false);
+        return;
+      }
+
+      let hasSession = Boolean(signUp.data.session);
+      if (!hasSession) {
+        const signInFallback = await supabase.auth.signInWithPassword({
+          email: normalizedEmail,
+          password,
+        });
+        hasSession = Boolean(signInFallback.data.session) && !signInFallback.error;
+      }
+
       setPassword("");
       setConfirmPassword("");
-      if (data?.redirectTo) {
-        router.push(data.redirectTo);
+      setIsSubmitting(false);
+
+      if (hasSession) {
+        router.push("/profile/setup");
         router.refresh();
         return;
       }
-      setNotice(data?.message ?? "Account created. Sign in to continue profile setup.");
+
+      setNotice("Account created. Sign in to continue to your profile quiz.");
       return;
     }
 
-    router.push(data?.redirectTo ?? "/home");
+    const signIn = await supabase.auth.signInWithPassword({
+      email: normalizedEmail,
+      password,
+    });
+
+    if (signIn.error || !signIn.data.user) {
+      setError("Invalid email or password.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    const { data: profile } = await supabase
+      .from("users")
+      .select("status")
+      .eq("id", signIn.data.user.id)
+      .maybeSingle();
+
+    setIsSubmitting(false);
+
+    if (!profile) {
+      router.push("/profile/setup");
+      router.refresh();
+      return;
+    }
+
+    if (profile.status === "banned") {
+      router.push("/banned");
+      router.refresh();
+      return;
+    }
+
+    router.push("/home");
     router.refresh();
   }
 

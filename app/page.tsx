@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 import { SchoolLogo } from "@/components/branding/school-logo";
 import { HouseBadge } from "@/components/house-badge";
@@ -6,16 +9,34 @@ import { MainMarketsBoard } from "@/components/landing/main-markets-board";
 import { RecommendMarketBubble } from "@/components/landing/recommend-market-bubble";
 import { MarketCard } from "@/components/market-card";
 import { Reveal } from "@/components/motion/reveal";
-import { getLandingMarketBoardData, getViewerProfile } from "@/lib/data/live";
+import { getLandingMarketBoardData, getViewerProfile } from "@/lib/data/browser-live";
+import type { MarketCardData, ViewerProfile } from "@/lib/data/types";
 import { HOUSE_STANDINGS } from "@/lib/mock-data";
 
-export const dynamic = "force-dynamic";
+export default function LandingPage() {
+  const [viewer, setViewer] = useState<ViewerProfile | null>(null);
+  const [landingMarkets, setLandingMarkets] = useState<MarketCardData[]>([]);
 
-export default async function LandingPage() {
-  const [viewer, landingMarkets] = await Promise.all([
-    getViewerProfile(),
-    getLandingMarketBoardData(),
-  ]);
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      const [viewerData, marketsData] = await Promise.all([
+        getViewerProfile(),
+        getLandingMarketBoardData(),
+      ]);
+
+      if (cancelled) return;
+      setViewer(viewerData);
+      setLandingMarkets(marketsData);
+    }
+
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const previewMarkets = landingMarkets.slice(0, 4);
   const primaryHref = viewer
     ? viewer.status === "active"
@@ -127,25 +148,6 @@ export default async function LandingPage() {
             </Reveal>
           ) : null}
         </div>
-      </section>
-
-      <section className="mx-auto mt-12 grid max-w-6xl gap-4 px-6 md:grid-cols-3 md:px-10">
-        <Reveal className="surface p-5" delay={0.48} variant="spring">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--accent-blue)]">How It Works</p>
-          <p className="mt-2 text-sm ink-soft">1. Join with school email and complete profile.</p>
-          <p className="mt-1 text-sm ink-soft">2. Get approved and receive 100 starting points.</p>
-          <p className="mt-1 text-sm ink-soft">3. Forecast outcomes and build your balance.</p>
-        </Reveal>
-        <Reveal className="surface p-5" delay={0.58} variant="spring">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--accent-gold)]">House Cup Logic</p>
-          <p className="mt-2 text-sm ink-soft">Only market win payouts count toward house totals.</p>
-          <p className="mt-1 text-sm muted">Signup, daily, and referral bonuses are personal only.</p>
-        </Reveal>
-        <Reveal className="surface p-5" delay={0.68} variant="spring">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--accent-green)]">School-Safe Platform</p>
-          <p className="mt-2 text-sm ink-soft">Virtual points only, no cash value, admin-resolved markets.</p>
-          <p className="mt-1 text-sm muted">Built for probability literacy and responsible forecasting.</p>
-        </Reveal>
       </section>
 
       <MainMarketsBoard markets={landingMarkets} />

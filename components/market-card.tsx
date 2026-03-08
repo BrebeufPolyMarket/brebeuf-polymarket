@@ -33,7 +33,7 @@ export function MarketCard({ market, readOnly = false }: MarketCardProps) {
         </div>
       </div>
 
-      <Link href={`/market/${market.id}`} className={cn("block", readOnly && "pointer-events-none")}>
+      <Link href={`/market?id=${market.id}`} className={cn("block", readOnly && "pointer-events-none")}>
         <h3 className="line-clamp-2 text-base font-semibold text-[var(--ink)]">{market.title}</h3>
         <p className="mt-2 line-clamp-2 text-xs muted">{market.description}</p>
 
