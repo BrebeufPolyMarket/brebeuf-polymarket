@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { AuthenticatedShell } from "@/components/authenticated-shell";
 import { PortfolioValueChart } from "@/components/charts/portfolio-value-chart";
+import { LoadingState } from "@/components/loading-state";
 import { Reveal } from "@/components/motion/reveal";
 import { getPortfolioData } from "@/lib/data/browser-live";
 import type { PortfolioData } from "@/lib/data/types";
@@ -48,9 +49,7 @@ export default function PortfolioPage() {
   if (!loaded) {
     return (
       <AuthenticatedShell viewer={portfolio?.viewer ?? null}>
-        <article className="surface max-w-lg p-6 text-center">
-          <h1 className="text-2xl font-black text-[var(--ink)]">Loading Portfolio...</h1>
-        </article>
+        <LoadingState title="Loading Portfolio..." />
       </AuthenticatedShell>
     );
   }

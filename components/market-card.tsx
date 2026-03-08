@@ -59,7 +59,7 @@ export function MarketCard({ market, readOnly = false }: MarketCardProps) {
 
         {isMulti ? <p className="mt-2 text-[11px] font-medium text-[var(--accent-gold)]">Trading for multi markets is coming soon.</p> : null}
 
-        <div className="mt-4 grid grid-cols-4 gap-2 text-[11px] muted">
+        <div className="mt-4 grid grid-cols-2 gap-2 text-[11px] muted sm:grid-cols-4">
           <span>{market.volume.toLocaleString()} vol</span>
           <span>{market.comments} comments</span>
           <span>{market.closesIn}</span>

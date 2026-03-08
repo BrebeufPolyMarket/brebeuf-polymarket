@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { AuthenticatedShell } from "@/components/authenticated-shell";
+import { LoadingState } from "@/components/loading-state";
 import { UserAvatar } from "@/components/user-avatar";
 import { isAllowedSchoolEmail } from "@/lib/auth/domain";
 import { HOUSE_CONFIG, HOUSE_IDS } from "@/lib/houses";
@@ -433,81 +434,81 @@ export default function ProfileSetupPage() {
     );
   }
 
+  if (!hydrated) {
+    return (
+      <AuthenticatedShell viewer={null}>
+        <LoadingState title="Loading Profile Setup..." />
+      </AuthenticatedShell>
+    );
+  }
+
   return (
     <AuthenticatedShell viewer={null} contentClassName="flex items-start justify-center">
       <section className="w-full max-w-2xl surface p-6 md:p-8">
-        {!hydrated ? (
-          <div className="space-y-4">
-            <h1 className="text-3xl font-black text-[var(--ink)]">Loading Profile Setup...</h1>
-            <div className="h-2 rounded-full bg-[color-mix(in_srgb,#fff_65%,#e2ecf5_35%)]" />
-            <div className="surface-soft h-48" />
+        <>
+          <h1 className="text-3xl font-black text-[var(--ink)]">Profile Setup Quiz</h1>
+          <p className="mt-2 text-sm muted">One quick question at a time. You only do this once.</p>
+
+          <div className="mt-5">
+            <div className="mb-2 flex items-center justify-between text-xs font-semibold uppercase tracking-[0.14em] muted">
+              <span>
+                Step {step + 1} of {TOTAL_STEPS}
+              </span>
+              <span>{Math.round(percent)}%</span>
+            </div>
+            <div className="h-2 rounded-full bg-[color-mix(in_srgb,#fff_65%,#e2ecf5_35%)]">
+              <div
+                className="h-2 rounded-full bg-[var(--accent-blue)] transition-[width] duration-300"
+                style={{ width: `${percent}%` }}
+              />
+            </div>
           </div>
-        ) : (
-          <>
-            <h1 className="text-3xl font-black text-[var(--ink)]">Profile Setup Quiz</h1>
-            <p className="mt-2 text-sm muted">One quick question at a time. You only do this once.</p>
 
-            <div className="mt-5">
-              <div className="mb-2 flex items-center justify-between text-xs font-semibold uppercase tracking-[0.14em] muted">
-                <span>
-                  Step {step + 1} of {TOTAL_STEPS}
-                </span>
-                <span>{Math.round(percent)}%</span>
-              </div>
-              <div className="h-2 rounded-full bg-[color-mix(in_srgb,#fff_65%,#e2ecf5_35%)]">
-                <div
-                  className="h-2 rounded-full bg-[var(--accent-blue)] transition-[width] duration-300"
-                  style={{ width: `${percent}%` }}
-                />
-              </div>
-            </div>
+          <div key={step} className="quiz-step-fade mt-7">
+            <h2 className="text-2xl font-black text-[var(--ink)]">{stepMeta[step].title}</h2>
+            <p className="mt-2 text-sm muted">{stepMeta[step].subtitle}</p>
 
-            <div key={step} className="quiz-step-fade mt-7">
-              <h2 className="text-2xl font-black text-[var(--ink)]">{stepMeta[step].title}</h2>
-              <p className="mt-2 text-sm muted">{stepMeta[step].subtitle}</p>
+            <div className="mt-5">{renderStepBody()}</div>
+          </div>
 
-              <div className="mt-5">{renderStepBody()}</div>
-            </div>
+          {error ? <p className="mt-4 text-sm font-medium text-[var(--accent-red)]">{error}</p> : null}
 
-            {error ? <p className="mt-4 text-sm font-medium text-[var(--accent-red)]">{error}</p> : null}
+          <div className="mt-7 flex items-center justify-between gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                setError(null);
+                setStep((current) => Math.max(0, current - 1));
+              }}
+              disabled={step === 0 || isSubmitting}
+              className="btn-secondary min-w-[120px] px-6 py-3 text-base disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Back
+            </button>
 
-            <div className="mt-7 flex items-center justify-between gap-3">
+            {step < TOTAL_STEPS - 1 ? (
+              <button
+                type="button"
+                onClick={goNext}
+                disabled={isSubmitting}
+                className="btn-primary min-w-[180px] px-8 py-3.5 text-base disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                Next
+              </button>
+            ) : (
               <button
                 type="button"
                 onClick={() => {
-                  setError(null);
-                  setStep((current) => Math.max(0, current - 1));
+                  void submitProfile();
                 }}
-                disabled={step === 0 || isSubmitting}
-                className="btn-secondary min-w-[120px] px-6 py-3 text-base disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={isSubmitting}
+                className="btn-primary min-w-[240px] px-8 py-3.5 text-base disabled:cursor-not-allowed disabled:opacity-70"
               >
-                Back
+                {isSubmitting ? "Submitting..." : "Submit Profile"}
               </button>
-
-              {step < TOTAL_STEPS - 1 ? (
-                <button
-                  type="button"
-                  onClick={goNext}
-                  disabled={isSubmitting}
-                  className="btn-primary min-w-[180px] px-8 py-3.5 text-base disabled:cursor-not-allowed disabled:opacity-70"
-                >
-                  Next
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => {
-                    void submitProfile();
-                  }}
-                  disabled={isSubmitting}
-                  className="btn-primary min-w-[240px] px-8 py-3.5 text-base disabled:cursor-not-allowed disabled:opacity-70"
-                >
-                  {isSubmitting ? "Submitting..." : "Submit Profile"}
-                </button>
-              )}
-            </div>
-          </>
-        )}
+            )}
+          </div>
+        </>
       </section>
     </AuthenticatedShell>
   );

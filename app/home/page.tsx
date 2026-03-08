@@ -8,6 +8,7 @@ import { SchoolLogo } from "@/components/branding/school-logo";
 import { HomeMarketGrid } from "@/components/home/home-market-grid";
 import { HouseCupWidget } from "@/components/house-cup-widget";
 import { LiveActivityPanel } from "@/components/live-activity-panel";
+import { LoadingState } from "@/components/loading-state";
 import { Reveal } from "@/components/motion/reveal";
 import { getHomeFeedData } from "@/lib/data/browser-live";
 import type { HouseStandingData, LiveActivityItem, MarketCardData, ViewerProfile } from "@/lib/data/types";
@@ -58,9 +59,7 @@ export default function HomeFeedPage() {
   if (isLoading || !state) {
     return (
       <AuthenticatedShell viewer={null}>
-        <article className="surface max-w-md p-6 text-center">
-          <h1 className="text-xl font-black text-[var(--ink)]">Loading Home Feed...</h1>
-        </article>
+        <LoadingState title="Loading Home Feed..." />
       </AuthenticatedShell>
     );
   }

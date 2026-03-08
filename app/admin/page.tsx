@@ -8,6 +8,7 @@ import { Check, PlusCircle, Search, ShieldAlert, Users } from "lucide-react";
 import { RecommendationReviewActions } from "@/components/admin/recommendation-review-actions";
 import { AuthenticatedShell } from "@/components/authenticated-shell";
 import { HouseBadge } from "@/components/house-badge";
+import { LoadingState } from "@/components/loading-state";
 import { UserAvatar } from "@/components/user-avatar";
 import { getAdminDashboardData, getAdminRecommendationsData, getAdminUsersData, getPendingApprovalsData, getViewerProfile } from "@/lib/data/browser-live";
 import type { AdminDashboardData, AdminRecommendationsData, AdminUserRow, PendingApprovalRow, ViewerProfile } from "@/lib/data/types";
@@ -367,9 +368,7 @@ function AdminDashboardContent() {
   if (loading || !state) {
     return (
       <AuthenticatedShell viewer={null}>
-        <section className="mx-auto max-w-lg surface p-6 text-center">
-          <h1 className="text-2xl font-black text-[var(--ink)]">Loading Admin Workspace...</h1>
-        </section>
+        <LoadingState title="Loading Admin Workspace..." />
       </AuthenticatedShell>
     );
   }
@@ -946,9 +945,7 @@ export default function AdminDashboardPage() {
     <Suspense
       fallback={(
         <AuthenticatedShell viewer={null}>
-          <section className="mx-auto max-w-lg surface p-6 text-center">
-            <h1 className="text-2xl font-black text-[var(--ink)]">Loading Admin Workspace...</h1>
-          </section>
+          <LoadingState title="Loading Admin Workspace..." />
         </AuthenticatedShell>
       )}
     >

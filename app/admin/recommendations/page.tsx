@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 import { AuthenticatedShell } from "@/components/authenticated-shell";
+import { LoadingState } from "@/components/loading-state";
 
 export default function AdminRecommendationsPage() {
   const router = useRouter();
@@ -14,9 +15,7 @@ export default function AdminRecommendationsPage() {
 
   return (
     <AuthenticatedShell viewer={null}>
-      <section className="mx-auto max-w-lg surface p-6 text-center">
-        <h1 className="text-2xl font-black text-[var(--ink)]">Opening Recommendations...</h1>
-      </section>
+      <LoadingState title="Opening Recommendations..." />
     </AuthenticatedShell>
   );
 }

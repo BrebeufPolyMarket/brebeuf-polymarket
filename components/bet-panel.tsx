@@ -121,10 +121,27 @@ export function BetPanel({
         className="input-clean mt-1"
       />
 
-      <div className="surface-soft mt-4 p-3 text-xs ink-soft">
-        <p>You get ~{shares.toFixed(2)} shares</p>
-        <p>If {side} wins: +{projectedPayout} pts</p>
-        <p>Fee: {feePoints} pts</p>
+      <div className="surface-soft mt-4 p-3">
+        <p className="text-xs font-semibold uppercase tracking-[0.12em] muted">Trade Summary</p>
+        <dl className="mt-2 space-y-1 text-sm">
+          <div className="flex items-center justify-between gap-3">
+            <dt className="ink-soft">Estimated shares</dt>
+            <dd className="tabular-nums font-semibold text-[var(--ink)]">{shares.toFixed(2)}</dd>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <dt className="ink-soft">Payout if {side} wins</dt>
+            <dd className="tabular-nums font-semibold text-[var(--ink)]">+{projectedPayout} pts</dd>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <dt className="ink-soft">Platform fee ({Math.round(feeRate * 100)}%)</dt>
+            <dd className="tabular-nums font-semibold text-[var(--ink)]">{feePoints} pts</dd>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <dt className="ink-soft">Net points used</dt>
+            <dd className="tabular-nums font-semibold text-[var(--ink)]">{netPoints} pts</dd>
+          </div>
+        </dl>
+        <p className="mt-2 text-[11px] muted">Payouts are rounded down to whole points.</p>
       </div>
 
       {message ? <p className="mt-3 text-xs ink-soft">{message}</p> : null}

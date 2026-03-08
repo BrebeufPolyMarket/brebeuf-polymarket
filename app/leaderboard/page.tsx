@@ -9,6 +9,7 @@ import { AuthenticatedShell } from "@/components/authenticated-shell";
 import { HouseLogo } from "@/components/branding/house-logo";
 import { SchoolLogo } from "@/components/branding/school-logo";
 import { HouseBadge } from "@/components/house-badge";
+import { LoadingState } from "@/components/loading-state";
 import { Reveal } from "@/components/motion/reveal";
 import { UserAvatar } from "@/components/user-avatar";
 import { HOUSE_CONFIG } from "@/lib/houses";
@@ -64,9 +65,7 @@ function LeaderboardContent() {
   if (!state) {
     return (
       <AuthenticatedShell viewer={null}>
-        <article className="surface max-w-md p-6 text-center">
-          <h1 className="text-xl font-black text-[var(--ink)]">Loading Leaderboard...</h1>
-        </article>
+        <LoadingState title="Loading Leaderboard..." />
       </AuthenticatedShell>
     );
   }
@@ -215,9 +214,7 @@ export default function LeaderboardPage() {
     <Suspense
       fallback={(
         <AuthenticatedShell viewer={null}>
-          <article className="surface max-w-md p-6 text-center">
-            <h1 className="text-xl font-black text-[var(--ink)]">Loading Leaderboard...</h1>
-          </article>
+          <LoadingState title="Loading Leaderboard..." />
         </AuthenticatedShell>
       )}
     >

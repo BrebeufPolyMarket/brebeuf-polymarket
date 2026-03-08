@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { AuthenticatedShell } from "@/components/authenticated-shell";
+import { LoadingState } from "@/components/loading-state";
 import { Reveal } from "@/components/motion/reveal";
 import { MarketCard } from "@/components/market-card";
 import { getWatchlistData } from "@/lib/data/browser-live";
@@ -45,9 +46,7 @@ export default function WatchlistPage() {
   if (loading) {
     return (
       <AuthenticatedShell viewer={viewer}>
-        <article className="surface max-w-lg p-6 text-center">
-          <h1 className="text-2xl font-black text-[var(--ink)]">Loading Watchlist...</h1>
-        </article>
+        <LoadingState title="Loading Watchlist..." />
       </AuthenticatedShell>
     );
   }

@@ -7,6 +7,7 @@ import { AuthenticatedShell } from "@/components/authenticated-shell";
 import { BetPanel } from "@/components/bet-panel";
 import { YesProbabilityChart } from "@/components/charts/yes-probability-chart";
 import { HouseBadge } from "@/components/house-badge";
+import { LoadingState } from "@/components/loading-state";
 import { Reveal } from "@/components/motion/reveal";
 import { PositionCard } from "@/components/position-card";
 import { UserAvatar } from "@/components/user-avatar";
@@ -72,9 +73,7 @@ function MarketDetailContent() {
   if (loading) {
     return (
       <AuthenticatedShell viewer={viewer}>
-        <article className="surface max-w-lg p-6 text-center">
-          <h1 className="text-2xl font-black text-[var(--ink)]">Loading Market...</h1>
-        </article>
+        <LoadingState title="Loading Market..." />
       </AuthenticatedShell>
     );
   }
@@ -242,9 +241,7 @@ export default function MarketDetailPage() {
     <Suspense
       fallback={(
         <AuthenticatedShell viewer={null}>
-          <article className="surface max-w-lg p-6 text-center">
-            <h1 className="text-2xl font-black text-[var(--ink)]">Loading Market...</h1>
-          </article>
+          <LoadingState title="Loading Market..." />
         </AuthenticatedShell>
       )}
     >

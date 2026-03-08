@@ -243,6 +243,10 @@ h6 {
   animation: quizStepFade 0.38s cubic-bezier(0.44, 0, 0.56, 1) both;
 }
 
+.loading-fade {
+  animation: loadingFade 1.2s ease-in-out infinite;
+}
+
 @keyframes framerSpringIn {
   0% {
     opacity: 0.001;
@@ -288,6 +292,23 @@ h6 {
   }
 }
 
+@keyframes loadingFade {
+  0% {
+    opacity: 0.55;
+    transform: translateY(4px);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  100% {
+    opacity: 0.55;
+    transform: translateY(4px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .surface,
   .surface-soft,
@@ -314,6 +335,10 @@ h6 {
   }
 
   .quiz-step-fade {
+    animation: none !important;
+  }
+
+  .loading-fade {
     animation: none !important;
   }
 }

@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import { ResolveActions } from "@/components/admin/resolve-actions";
 import { AuthenticatedShell } from "@/components/authenticated-shell";
+import { LoadingState } from "@/components/loading-state";
 import { getAdminResolveMarketData, getViewerProfile } from "@/lib/data/browser-live";
 import type { AdminResolveMarketData, ViewerProfile } from "@/lib/data/types";
 
@@ -73,9 +74,7 @@ function AdminResolveContent() {
   if (loading) {
     return (
       <AuthenticatedShell viewer={viewer}>
-        <section className="mx-auto max-w-lg surface p-6 text-center">
-          <h1 className="text-2xl font-black text-[var(--ink)]">Loading Market Review...</h1>
-        </section>
+        <LoadingState title="Loading Market Review..." />
       </AuthenticatedShell>
     );
   }
@@ -123,9 +122,7 @@ export default function AdminResolvePage() {
     <Suspense
       fallback={(
         <AuthenticatedShell viewer={null}>
-          <section className="mx-auto max-w-lg surface p-6 text-center">
-            <h1 className="text-2xl font-black text-[var(--ink)]">Loading Market Review...</h1>
-          </section>
+          <LoadingState title="Loading Market Review..." />
         </AuthenticatedShell>
       )}
     >

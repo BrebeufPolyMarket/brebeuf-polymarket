@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { AuthenticatedShell } from "@/components/authenticated-shell";
+import { LoadingState } from "@/components/loading-state";
 import { ProfileSettingsForm } from "@/components/settings/profile-settings-form";
 import { getSettingsProfileData } from "@/lib/data/browser-live";
 import type { SettingsProfileData } from "@/lib/data/types";
@@ -42,9 +43,7 @@ export default function SettingsPage() {
   if (!loaded) {
     return (
       <AuthenticatedShell viewer={settings?.viewer ?? null}>
-        <article className="surface max-w-lg p-6 text-center">
-          <h1 className="text-2xl font-black text-[var(--ink)]">Loading Settings...</h1>
-        </article>
+        <LoadingState title="Loading Settings..." />
       </AuthenticatedShell>
     );
   }

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { AuthenticatedShell } from "@/components/authenticated-shell";
+import { LoadingState } from "@/components/loading-state";
 import { getViewerProfile } from "@/lib/data/browser-live";
 import type { ViewerProfile } from "@/lib/data/types";
 
@@ -35,9 +36,7 @@ export default function BannedPage() {
   if (!loaded) {
     return (
       <AuthenticatedShell viewer={viewer}>
-        <section className="mx-auto max-w-md surface p-6 text-center">
-          <h1 className="text-2xl font-black text-[var(--ink)]">Loading Account Status...</h1>
-        </section>
+        <LoadingState title="Loading Account Status..." />
       </AuthenticatedShell>
     );
   }

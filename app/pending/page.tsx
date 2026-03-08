@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { AuthenticatedShell } from "@/components/authenticated-shell";
 import { MarketCard } from "@/components/market-card";
+import { LoadingState } from "@/components/loading-state";
 import { Reveal } from "@/components/motion/reveal";
 import { PendingStatusListener } from "@/components/realtime/pending-status-listener";
 import { getPendingMarketsData, getViewerProfile } from "@/lib/data/browser-live";
@@ -54,9 +55,7 @@ export default function PendingApprovalPage() {
   if (loading) {
     return (
       <AuthenticatedShell viewer={viewer}>
-        <article className="surface max-w-md p-6 text-center">
-          <h1 className="text-xl font-black text-[var(--ink)]">Loading Pending Status...</h1>
-        </article>
+        <LoadingState title="Loading Pending Status..." />
       </AuthenticatedShell>
     );
   }

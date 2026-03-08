@@ -29,7 +29,7 @@ export function AppNavigation({ viewer }: AppNavigationProps) {
       <aside className="surface hidden min-h-[calc(100vh-2rem)] w-64 shrink-0 p-4 lg:block">
         <Link href="/home" className="mb-6 flex items-center gap-2">
           <SchoolLogo size={24} />
-          <span className="text-xs font-bold tracking-[0.2em] text-[var(--accent-blue)]">BREBEUF POLYMARKET</span>
+          <span className="text-[11px] font-bold leading-4 tracking-[0.12em] text-[var(--accent-blue)]">BREBEUF POLYMARKET</span>
         </Link>
 
         {viewer ? (
